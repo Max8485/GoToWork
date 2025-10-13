@@ -1,41 +1,119 @@
 package org.example.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.coordinates.Coordinates;
-import org.example.feign.TwoGisFeignClient;
+import org.example.model.GraphHopperResponse;
 import org.example.service.RouteService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Map;
+import java.util.Locale;
 
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class RouteServiceImpl implements RouteService {
 
-    @Value("${app.twogis.api-key}")
-    private String twoGisApiKey;
+    @Value("${app.graphhooper.api-key}")
+    private String graphApiKey;
 
-    private final TwoGisFeignClient twoGisFeignClient;
+    @Value("${app.graphhooper.url}")
+    private String graphUrl;
+
+    private final RestTemplate restTemplate;
+
     @Override
     public Integer calculateTravelTimeToWork(Coordinates start, Coordinates end) {
+
         try {
-            String points = String.format("%s,%s~%s,%s", start.getLat(), start.getLon(), end.getLat(), end.getLon());
-            String authorization = twoGisApiKey; //добавить "Token " ?
+            log.debug("Calculating route from {} to {}", start, end);
 
-            Map<String, Object> response = twoGisFeignClient.calculateRoute(authorization, points, "car", true);
+            String url = buildGraphHopperUrl(start, end);
+            log.debug("GraphHopper URL: {}", url.replace(graphApiKey, "***"));
 
-            if (response != null && response.containsKey("result")) {
-                Map<String, Object> result = (Map<String, Object>) response.get("result");
+            ResponseEntity<GraphHopperResponse> response = restTemplate.getForEntity(url, GraphHopperResponse.class);
 
-                if (result.containsKey("total_duration")) {
-                    return (Integer) result.get("total_duration");
-                }
-            }
-            throw new RuntimeException("Не удалось рассчитать продолжительность маршрута");
+            return processGraphHopperResponse(response.getBody());
 
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка при расчете маршрута : " + e.getMessage(), e);
+            log.error("Routing calculation failed", e);
+            throw new RuntimeException("Routing calculation failed: " + e.getMessage(), e);
         }
     }
+
+    private String buildGraphHopperUrl(Coordinates start, Coordinates end) {
+        // Правильное форматирование координат с ТОЧКАМИ и английской локалью
+        String startPoint = String.format(Locale.US, "%.6f,%.6f", start.getLat(), start.getLon());
+        String endPoint = String.format(Locale.US, "%.6f,%.6f", end.getLat(), end.getLon());
+
+        log.debug("Formatted points - start: {}, end: {}", startPoint, endPoint);
+
+        return UriComponentsBuilder.fromHttpUrl(graphUrl)
+                .queryParam("point", startPoint)
+                .queryParam("point", endPoint)
+                .queryParam("vehicle", "car")
+                .queryParam("locale", "ru")
+                .queryParam("key", graphApiKey)
+                .queryParam("calc_points", "false")
+                .queryParam("instructions", "false")
+                .queryParam("points_encoded", "false")
+                .encode()
+                .toUriString();
+    }
+
+    private Integer processGraphHopperResponse(GraphHopperResponse response) {
+        if (response == null) {
+            throw new RuntimeException("Empty response from GraphHopper API");
+        }
+
+        if (response.getMessage() != null) {
+            throw new RuntimeException("GraphHopper API error: " + response.getMessage());
+        }
+
+        if (response.getPaths() == null || response.getPaths().isEmpty()) {
+            throw new RuntimeException("No routes found in GraphHopper response");
+        }
+
+        var bestRoute = response.getPaths().get(0);
+
+        if (bestRoute.getTime() == null) {
+            throw new RuntimeException("No time information in GraphHopper route");
+        }
+
+        // Конвертируем миллисекунды в секунды
+        int travelTimeSeconds = (int) (bestRoute.getTime() / 1000);
+
+        log.info("Route calculated: {} seconds ({} minutes)", travelTimeSeconds, travelTimeSeconds / 60);
+
+        return travelTimeSeconds;
+    }
+//        try {
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.set("Authorization", twoGisApiKey);
+//
+//            String points = String.format("%s,%s~%s,%s",
+//                    start.getLat(), start.getLon(), end.getLat(), end.getLon());
+//
+//            String url = String.format("%s/get_route?points=%s&type=car&traffic=true",
+//                    twoGisUrl, points);
+//
+//            HttpEntity<String> entity = new HttpEntity<>(headers);
+//
+//            ResponseEntity<TwoGisResponse> response = restTemplate.exchange(
+//                    url, HttpMethod.GET, entity, TwoGisResponse.class);
+//
+//            if (response.getBody() != null && response.getBody().getResult() != null &&
+//                    response.getBody().getResult().getTotal_duration() != null) {
+//                return response.getBody().getResult().getTotal_duration(); // in seconds
+//            }
+//            throw new RuntimeException("No route duration found");
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException("Routing calculation failed: " + e.getMessage(), e);
+//        }
+//    }
 }

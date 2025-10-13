@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.repository.UserSettingsRepository;
 import org.example.route.RouteRequest;
 import org.example.route.RouteResponse;
 import org.example.service.RouteCalculationService;
@@ -12,15 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RouteController {
 
-    //установи git!
-    //сделать таблицу user_settings
-    //сделать таблицу response, чтобы можно было проверить работу расчетов. Для этого response надо сделать как Entity,
-    //и потом сделать responseDto, или оставить просто response.
-
     private final RouteCalculationService routeCalculationService;
+    private final UserSettingsRepository userSettingsRepository;
 
     @PostMapping("api/routes/calculate")
-    public RouteResponse calculateResponse(@RequestBody RouteRequest request) {
+    public RouteResponse calculateResponse(@RequestBody RouteRequest request) { //работает!
         return routeCalculationService.calculateOptimalRoute(request); //рассчитать оптимальный маршрут
     }
 }

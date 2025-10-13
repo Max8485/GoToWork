@@ -30,15 +30,15 @@ public class UserSettings {
     @Column(name = "time_zone")
     private String timeZone;
 
-    @Column(name = "travel_time_to_work")
-    private String travelTimeToWork; // HH:mm format
+    @Column(name = "arrival_time_to_work")
+    private String arrivalTimeToWork; // HH:mm format
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+//    @CreatedDate
+//    @Column(name = "created_at")
+//    private LocalDateTime createdAt;
+//
+//    @LastModifiedDate
+//    @Column(name = "updated_at")
+//    private LocalDateTime updatedAt;
 
 }

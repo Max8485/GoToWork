@@ -4,17 +4,17 @@ spring:
     username: postgres
     password: postgres
 
-#  liquibase:
-#    change-log: classpath:db/changelog.xml
+  liquibase:
+    change-log: classpath:db/changelog.xml
 
-#  jpa:
-#    show-sql: true
-#    open-in-view: false
+  jpa:
+    show-sql: true
+    open-in-view: false
 
 app:
   dadata:
     api-key: f0d7b7fbc70c8fd3baaa7a534539ef03c265e412
     url: https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address
-  twogis:
-    api-key: fceafaa7-8334-4910-9f22-5064da2f2489
-    url: https://routing.api.2gis.com
+  graphhooper:
+    api-key: 443b290d-37b9-495d-b3bd-688e8e28ff1e
+    url: https://graphhopper.com/api/1/route

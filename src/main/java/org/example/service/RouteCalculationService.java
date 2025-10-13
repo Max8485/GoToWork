@@ -6,5 +6,7 @@ import org.example.route.RouteResponse;
 public interface RouteCalculationService {
 
     RouteResponse calculateOptimalRoute(RouteRequest request);
-    void calculateDailyRoutes();
+//    void calculateDailyRoutes();
+
+    void sendDailyNotifications();
 }

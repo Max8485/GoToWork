@@ -1,0 +1,36 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="2025-10-11-add-user-settings-table" author="Maxim">
+        <createTable tableName="user_settings" remarks="Таблица с настройками пользователя">
+            <column name="id" type="bigint" autoIncrement="true" remarks="Id пользователя">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="home_address" type="text" remarks="Домашний адрес пользователя">
+                <constraints nullable="false"/>
+            </column>
+            <column name="work_address" type="text" remarks="Рабочий адрес пользователя">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time_zone" type="text"
+                    remarks="Часовой пояс пользователя">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrival_time_to_work" type="text"
+                    remarks="Время прибытия на работу">
+                <constraints nullable="false"/>
+            </column>
+<!--            <column name="created_at" type="date"-->
+<!--                    remarks="Дата создания">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="updated_at" type="date"-->
+<!--                    remarks="Дата изменения">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
