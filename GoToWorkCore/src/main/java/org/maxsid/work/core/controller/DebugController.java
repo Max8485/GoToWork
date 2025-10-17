@@ -57,7 +57,7 @@ public class DebugController {
             String endFormatted = String.format(Locale.US, "%.6f,%.6f", end.getLat(), end.getLon());
             log.debug("Formatted coordinates - start: {}, end: {}", startFormatted, endFormatted);
 
-            Integer duration = routingService.calculateTravelTimeToWork(start, end);
+            Long duration = routingService.calculateTravelTimeToWork(start, end);
 
             Map<String, Object> response = new HashMap<>();
             response.put("start", start);

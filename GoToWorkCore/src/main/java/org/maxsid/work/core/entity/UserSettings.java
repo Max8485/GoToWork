@@ -21,6 +21,9 @@ public class UserSettings {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(name = "home_address")
     private String homeAddress;
 
@@ -31,14 +34,13 @@ public class UserSettings {
     private String timeZone;
 
     @Column(name = "arrival_time_to_work")
-    private String arrivalTimeToWork; // HH:mm format
+    private String arrivalTimeToWork;
 
-//    @CreatedDate
-//    @Column(name = "created_at")
-//    private LocalDateTime createdAt;
-//
-//    @LastModifiedDate
-//    @Column(name = "updated_at")
-//    private LocalDateTime updatedAt;
-
+    public UserSettings(Long userId, String homeAddress, String workAddress, String timeZone, String arrivalTimeToWork) {
+        this.userId = userId;
+        this.homeAddress = homeAddress;
+        this.workAddress = workAddress;
+        this.timeZone = timeZone;
+        this.arrivalTimeToWork = arrivalTimeToWork;
+    }
 }

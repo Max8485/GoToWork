@@ -6,8 +6,11 @@
 
     <changeSet id="2025-10-11-add-user-settings-table" author="Maxim">
         <createTable tableName="user_settings" remarks="Таблица с настройками пользователя">
-            <column name="id" type="bigint" autoIncrement="true" remarks="Id пользователя">
+            <column name="id" type="bigint" autoIncrement="true" remarks="Id настроек пользователя">
                 <constraints primaryKey="true"/>
+            </column>
+            <column name="user_id" type="bigint" remarks="Id пользователя">
+                <constraints nullable="false"/>
             </column>
             <column name="home_address" type="text" remarks="Домашний адрес пользователя">
                 <constraints nullable="false"/>
@@ -23,14 +26,6 @@
                     remarks="Время прибытия на работу">
                 <constraints nullable="false"/>
             </column>
-<!--            <column name="created_at" type="date"-->
-<!--                    remarks="Дата создания">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
-<!--            <column name="updated_at" type="date"-->
-<!--                    remarks="Дата изменения">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
         </createTable>
     </changeSet>
 </databaseChangeLog>

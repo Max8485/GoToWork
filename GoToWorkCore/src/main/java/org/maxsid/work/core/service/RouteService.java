@@ -4,5 +4,5 @@ import org.maxsid.work.core.coordinates.Coordinates;
 
 public interface RouteService {
 
-    Integer calculateTravelTimeToWork(Coordinates start, Coordinates end);
+    Long calculateTravelTimeToWork(Coordinates start, Coordinates end);
 }

@@ -9,7 +9,7 @@ import lombok.*;
 @ToString
 @Builder
 public class RouteRequest {
-    private Long id;
+//    private Long id;
 
     private String homeAddress;
 

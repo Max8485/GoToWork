@@ -8,23 +8,23 @@ import org.maxsid.work.core.dto.RouteRequest;
 import org.maxsid.work.core.service.UserSettingsService;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
-@Slf4j
-@Service
+//@RequiredArgsConstructor
+//@Slf4j
+//@Service
 public class UserSettingsServiceImpl implements UserSettingsService {
 
-    private final UserSettingsRepository userSettingsRepository;
-
-    public void saveUserSettingsForBot(RouteRequest request) {
-        UserSettings settings = userSettingsRepository.findById(request.getId())
-                .orElse(new UserSettings());
-        settings.setId(request.getId());
-        settings.setHomeAddress(request.getHomeAddress());
-        settings.setWorkAddress(request.getWorkAddress());
-        settings.setArrivalTimeToWork(request.getArrivalTime());
-        settings.setTimeZone(request.getTimeZone());
-        userSettingsRepository.save(settings);
-
-        log.debug("Settings saved for user: {}", request.getId());
-    }
+//    private final UserSettingsRepository userSettingsRepository;
+//
+//    public void saveUserSettingsForBot(RouteRequest request) {
+//        UserSettings settings = userSettingsRepository.findById(request.getId())
+//                .orElse(new UserSettings());
+//        settings.setId(request.getId());
+//        settings.setHomeAddress(request.getHomeAddress());
+//        settings.setWorkAddress(request.getWorkAddress());
+//        settings.setArrivalTimeToWork(request.getArrivalTime());
+//        settings.setTimeZone(request.getTimeZone());
+//        userSettingsRepository.save(settings);
+//
+//        log.debug("Settings saved for user: {}", request.getId());
+//    }
 }
