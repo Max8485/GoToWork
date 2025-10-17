@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.entity.UserSettings;
 import org.maxsid.work.core.repository.UserSettingsRepository;
-import org.maxsid.work.core.route.RouteRequest;
+import org.maxsid.work.core.dto.RouteRequest;
 import org.maxsid.work.core.service.UserSettingsService;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
 package org.maxsid.work.core.service;
 
-import org.maxsid.work.core.route.RouteRequest;
-import org.maxsid.work.core.route.RouteResponse;
+import org.maxsid.work.core.dto.RouteRequest;
+import org.maxsid.work.core.dto.RouteResponse;
 
 public interface RouteCalculationService {
 

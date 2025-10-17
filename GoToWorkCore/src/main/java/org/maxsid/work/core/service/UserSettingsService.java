@@ -1,7 +1,6 @@
 package org.maxsid.work.core.service;
 
-import org.maxsid.work.core.entity.UserSettings;
-import org.maxsid.work.core.route.RouteRequest;
+import org.maxsid.work.core.dto.RouteRequest;
 
 public interface UserSettingsService {
 

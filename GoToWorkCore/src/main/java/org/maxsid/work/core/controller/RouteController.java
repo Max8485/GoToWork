@@ -2,8 +2,8 @@ package org.maxsid.work.core.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.maxsid.work.core.entity.UserSettings;
-import org.maxsid.work.core.route.RouteRequest;
-import org.maxsid.work.core.route.RouteResponse;
+import org.maxsid.work.core.dto.RouteRequest;
+import org.maxsid.work.core.dto.RouteResponse;
 import org.maxsid.work.core.service.RouteCalculationService;
 import org.maxsid.work.core.service.UserSettingsService;
 import org.maxsid.work.core.service.impl.RouteCalculationServiceImpl;

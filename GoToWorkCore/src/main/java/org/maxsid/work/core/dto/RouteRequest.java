@@ -1,4 +1,4 @@
-package org.maxsid.work.core.route;
+package org.maxsid.work.core.dto;
 
 import lombok.*;
 
