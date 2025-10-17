@@ -6,5 +6,5 @@ public interface GeocodeService{
 
     Coordinates geocodeAddress(String address);
 
-    String detectTimezone(Coordinates coordinate);
+//    String detectTimezone(Coordinates coordinate);
 }

@@ -18,9 +18,6 @@ import java.util.Optional;
 public class RouteController {
 
     private final RouteCalculationService routeCalculationService;
-//    private final RouteCalculationServiceImpl routeCalculationServiceImpl;
-//    private final UserSettingsService userSettingsService;
-
 
     @PostMapping("/users/{userId}/settings") //работает
     public ResponseEntity<UserSettings> saveUserSettings(
@@ -35,7 +32,7 @@ public class RouteController {
         }
     }
 
-    @GetMapping("/users/{userId}/calculate") //работает
+    @GetMapping("/users/{userId}/calculate") //работает даже с Калиниградом
     public ResponseEntity<RouteResponse> calculateRoute(@PathVariable Long userId) {
         try {
             RouteResponse response = routeCalculationService.calculateOptimalRoute(userId);

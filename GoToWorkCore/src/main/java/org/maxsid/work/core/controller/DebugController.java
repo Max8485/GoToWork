@@ -18,8 +18,6 @@ import java.util.Map;
 @RequestMapping("/api/debug")
 public class DebugController {
 
-    //http://localhost:8080/api/debug/routing?address1=Москва, Кутузовский проспект 32&address2=Москва, Красная площадь 1"
-
     private final GeocodeService geocodingService;
     private final RouteService routingService;
 
