@@ -1,4 +1,4 @@
-package org.maxsid.work.core.route;
+package org.maxsid.work.bot.dto;
 
 import lombok.*;
 
@@ -9,6 +9,7 @@ import lombok.*;
 @ToString
 @Builder
 public class RouteRequest {
+
     private Long id;
 
     private String homeAddress;

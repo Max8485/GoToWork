@@ -8,10 +8,10 @@
     <artifactId>GoToWorkParent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <modules>
         <module>GoToWorkCore</module>
         <module>TelegramBot</module>
-        <module>test</module>
     </modules>
 
     <parent>

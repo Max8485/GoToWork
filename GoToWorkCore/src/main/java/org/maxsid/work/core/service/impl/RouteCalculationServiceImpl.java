@@ -19,6 +19,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,12 +29,11 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     private final GeocodeService geocodeService;
     private final RouteService routeService;
     private final UserSettingsRepository userSettingsRepository;
-//    private final NotificationService notificationService;
 
     @Override
     public RouteResponse calculateOptimalRoute(RouteRequest request) {
         try {
-            log.info("Calculating route for user: {}", request.getId());
+//            log.info("Calculating route for user: {}", request.getId());
 
             // Геокодирование адресов
             Coordinates homeCoord = geocodeService.geocodeAddress(request.getHomeAddress());
@@ -78,11 +78,11 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
                     true
             );
 
-            log.info("Route calculation successful for user: {}", request.getId());
+//            log.info("Route calculation successful for user: {}", request.getId());
             return response;
 
         } catch (Exception e) {
-            log.error("Route calculation failed for user: {}", request.getId(), e);
+//            log.error("Route calculation failed for user: {}", request.getId(), e);
 
             String errorMessage = buildErrorMessage(e);
             return new RouteResponse(request.getId(), null, null, errorMessage, false);
@@ -126,6 +126,10 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
         userSettingsRepository.save(settings);
 
         log.debug("Settings saved for user: {}", request.getId());
+    }
+
+    public Optional<UserSettings> getUserSettings(Long userId) {
+        return userSettingsRepository.findById(userId);
     }
 
     @Scheduled(cron = "0 0 6 * * MON-FRI") // Каждый будний день в 6 утра
