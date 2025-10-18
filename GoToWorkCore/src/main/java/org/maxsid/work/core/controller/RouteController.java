@@ -52,24 +52,6 @@ public class RouteController {
         return settings.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-//    @PostMapping("api/routes/calculate")
-//    public RouteResponse calculateResponse(@RequestBody RouteRequest request) { //работает!
-//        return routeCalculationService.calculateOptimalRoute(request); //рассчитать оптимальный маршрут
-//    }
-//
-//    @PostMapping("api/routes/users/settings") //работает. Сделать с userId
-//    public void saveUserSettings(
-//            @RequestBody RouteRequest request) {
-//        userSettingsService.saveUserSettingsForBot(request);
-//    }
-//
-//    @GetMapping("api/routes/users/{userId}/settings") //работает
-//    public ResponseEntity<UserSettings> getUserSettings(@PathVariable(value = "userId") Long userId) {
-//        Optional<UserSettings> userSettings = routeCalculationServiceImpl.getUserSettings(userId);
-//        return userSettings.map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
 }
 
 

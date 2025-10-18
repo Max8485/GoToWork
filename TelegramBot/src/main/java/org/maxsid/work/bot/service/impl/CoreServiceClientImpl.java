@@ -39,24 +39,4 @@ public class CoreServiceClientImpl implements CoreServiceClient {
         ResponseEntity<UserSettings> response = restTemplate.getForEntity(url, UserSettings.class);
         return response.getBody();
     }
-
-//    @Override
-//    public void saveUserSettings(Long userId, RouteRequest request) {
-//        String url = coreServiceUrl + "/users/" + userId + "/settings";
-//        restTemplate.postForEntity(url, request, String.class);
-//    }
-//
-//    @Override
-//    public RouteResponse calculateRoute(Long userId) {
-//        String url = coreServiceUrl + "/users/" + userId + "/calculate";
-//        ResponseEntity<RouteResponse> response = restTemplate.getForEntity(url, RouteResponse.class);
-//        return response.getBody();
-//    }
-//
-//    @Override
-//    public RouteRequest getUserSettings(Long userId) {
-//        String url = coreServiceUrl + "/users/" + userId + "/settings";
-//        ResponseEntity<RouteRequest> response = restTemplate.getForEntity(url, RouteRequest.class);
-//        return response.getBody();
-//    }
 }

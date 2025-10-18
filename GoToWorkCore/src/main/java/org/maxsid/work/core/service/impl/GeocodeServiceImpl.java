@@ -92,9 +92,7 @@ public class GeocodeServiceImpl implements GeocodeService {
         }
     }
 
-    public String detectTimezone(Coordinates coordinate) { //исправить!
-        // Для простоты используем московский часовой пояс
-        // В реальном приложении можно использовать Timezone API
-        return "Europe/Kaliningrad";
-    }
+//    public String detectTimezone(Coordinates coordinate) { //исправить!
+//        return "Europe/Moscow";
+//    }
 }
