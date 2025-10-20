@@ -1,17 +1,21 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/go_to_work_db
-    username: postgres
-    password: postgres
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
 
 
   liquibase:
     change-log: classpath:db/changelog.xml
 
+  jpa:
+    show-sql: true
+    open-in-view: false
+
 server:
   port: 8081
 
 bot:
-  token: 8326413347:AAGF078sIq646SQafkaBgz1Eht9PQnciqAQ
-  username: go_to_work1_bot
+  token: ${BOT_TOKEN:8326413347:AAGF078sIq646SQafkaBgz1Eht9PQnciqAQ}
+  username: ${BOT_USERNAME:go_to_work1_bot}
   url: http://localhost:8080/api/routes
