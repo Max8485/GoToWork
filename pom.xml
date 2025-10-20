@@ -25,12 +25,9 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <testcontainers.version>1.16.0</testcontainers.version>
-        <!--        <mapstruct.version>1.4.2.Final</mapstruct.version>-->
-        <!--        <lombok.mupstruct.binding.version>0.2.0</lombok.mupstruct.binding.version>-->
         <lombok.version>1.18.30</lombok.version>
         <jaxb-api.version>2.1</jaxb-api.version>
         <springframework.cloud.version>4.1.4</springframework.cloud.version>
-        <!--        <jwt.version>0.9.1</jwt.version>-->
     </properties>
 
     <dependencyManagement>
@@ -88,32 +85,10 @@
                                 <artifactId>lombok</artifactId>
                                 <version>${lombok.version}</version>
                             </path>
-                            <!--                            <path>-->
-                            <!--                                <groupId>org.projectlombok</groupId>-->
-                            <!--                                <artifactId>lombok-mapstruct-binding</artifactId>-->
-                            <!--                                <version>${lombok.mupstruct.binding.version}</version>-->
-                            <!--                            </path>-->
-                            <!--                            <path>-->
-                            <!--                                <groupId>org.mapstruct</groupId>-->
-                            <!--                                <artifactId>mapstruct-processor</artifactId>-->
-                            <!--                                <version>${mapstruct.version}</version>-->
-                            <!--                            </path>-->
                         </annotationProcessorPaths>
                     </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
-    <!--    <build>-->
-    <!--        <plugins>-->
-    <!--            <plugin>-->
-    <!--                <groupId>org.springframework.boot</groupId>-->
-    <!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-    <!--            </plugin>-->
-    <!--            <plugin>-->
-    <!--                <groupId>org.apache.maven.plugins</groupId>-->
-    <!--                <artifactId>maven-compiler-plugin</artifactId>-->
-    <!--            </plugin>-->
-    <!--        </plugins>-->
-    <!--    </build>-->
 </project>

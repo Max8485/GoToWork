@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.maxsid.work.core.dto.RouteRequest;
 import org.maxsid.work.core.dto.RouteResponse;
 import org.maxsid.work.bot.service.CoreServiceClient;
+
+import org.maxsid.work.core.entity.UserSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.maxsid.work.core.entity.UserSettings;
+
 
 @RequiredArgsConstructor
 @Service

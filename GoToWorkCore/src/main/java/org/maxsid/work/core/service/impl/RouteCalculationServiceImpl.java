@@ -3,23 +3,16 @@ package org.maxsid.work.core.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
-import org.maxsid.work.core.entity.UserSettings;
-import org.maxsid.work.core.repository.UserSettingsRepository;
 import org.maxsid.work.core.dto.RouteRequest;
 import org.maxsid.work.core.dto.RouteResponse;
+import org.maxsid.work.core.entity.UserSettings;
+import org.maxsid.work.core.repository.UserSettingsRepository;
 import org.maxsid.work.core.service.GeocodeService;
 import org.maxsid.work.core.service.RouteCalculationService;
 import org.maxsid.work.core.service.RouteService;
 import org.maxsid.work.core.utils.TimeUtils;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -40,11 +33,11 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
 
         UserSettings userSettings = userSettingsOpt.get();
 
-//        // Проверяем, будний ли день, работает!
-//        if (!TimeUtils.isWeekday()) {
-//            log.info("Расчет маршрута доступен только в будние дни");
-//            throw new IllegalStateException("Расчет маршрута доступен только в будние дни");
-//        }
+        // Проверяем, будний ли день, работает!
+        if (!TimeUtils.isWeekday()) {
+            log.info("Расчет маршрута доступен только в будние дни");
+            throw new IllegalStateException("Расчет маршрута доступен только в будние дни");
+        }
 
         // Геокодирование адресов
         Coordinates homeCoords = geocodeService.geocodeAddress(userSettings.getHomeAddress());
