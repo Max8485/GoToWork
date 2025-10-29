@@ -18,4 +18,4 @@ server:
 bot:
   token: ${BOT_TOKEN:8326413347:AAGF078sIq646SQafkaBgz1Eht9PQnciqAQ}
   username: ${BOT_USERNAME:go_to_work1_bot}
-  url: http://localhost:8080/api/routes
+  url: http://go-to-work:8080/api/routes

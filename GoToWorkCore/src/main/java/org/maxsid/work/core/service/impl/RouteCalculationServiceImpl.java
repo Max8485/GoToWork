@@ -33,11 +33,11 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
 
         UserSettings userSettings = userSettingsOpt.get();
 
-        // Проверяем, будний ли день, работает!
-        if (!TimeUtils.isWeekday()) {
-            log.info("Расчет маршрута доступен только в будние дни");
-            throw new IllegalStateException("Расчет маршрута доступен только в будние дни");
-        }
+//        // Проверяем, будний ли день, работает!
+//        if (!TimeUtils.isWeekday()) {
+//            log.info("Расчет маршрута доступен только в будние дни");
+//            throw new IllegalStateException("Расчет маршрута доступен только в будние дни");
+//        }
 
         // Геокодирование адресов
         Coordinates homeCoords = geocodeService.geocodeAddress(userSettings.getHomeAddress());

@@ -2,30 +2,31 @@ version: '3'
 services:
   go-to-work:
     build: ./GoToWorkCore
+#    image: max1994/gotoworkparent-go-to-work:latest
     container_name: goToWorkCore
     ports:
       - "8080:8080"
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       DADATA_API_KEY: ${DADATA_API_KEY}
       DADATA_URL: https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address
       GRAPHHOOPER_API_KEY: ${GRAPHHOOPER_API_KEY}
       GRAPHHOOPER_URL: https://graphhopper.com/api/1/route
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/go_to_work_db
-
 
   telegram-bot:
     build: ./TelegramBot
+#    image: max1994/gotoworkparent-telegram-bot:latest
     container_name: telegramBot
     ports:
       - "8081:8081"
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       TELEGRAM_BOT_TOKEN: ${BOT_TOKEN}
       TELEGRAM_BOT_USERNAME: ${BOT_USERNAME}
-      CORE_SERVICE_URL: http://localhost:8080/api/routes
+      CORE_SERVICE_URL: http://go-to-work:8080/api/routes
 
   postgres:
     image: postgres:13.1
-    container_name: goToWork-postgres
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
