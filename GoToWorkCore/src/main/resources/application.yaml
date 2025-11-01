@@ -11,8 +11,20 @@ spring:
     show-sql: true
     open-in-view: false
 
+#  application:
+#    name: go-to-work-core
+#
+#  profiles:
+#    active: ${SPRING_APPLICATION_PROFILE:dev}
+#
+#  logging:
+#    level:
+#      org.zalando.logbook: TRACE
+
 server:
   port: 8080
+
+#environment: ${ENVIRONMENT:dev}
 
 app:
   dadata:

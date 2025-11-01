@@ -12,6 +12,7 @@
     <modules>
         <module>GoToWorkCore</module>
         <module>TelegramBot</module>
+        <module>CommonDto</module>
     </modules>
 
     <parent>

@@ -12,8 +12,20 @@ spring:
     show-sql: true
     open-in-view: false
 
+#  application:
+#    name: telegram-bot
+#
+#  profiles:
+#    active: ${SPRING_APPLICATION_PROFILE:dev}
+#
+#  logging:
+#    level:
+#      org.zalando.logbook: TRACE
+
 server:
   port: 8081
+
+#environment: ${ENVIRONMENT:dev}
 
 bot:
   token: ${BOT_TOKEN:8326413347:AAGF078sIq646SQafkaBgz1Eht9PQnciqAQ}
