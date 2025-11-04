@@ -1,7 +1,9 @@
 version: '3'
 services:
   go-to-work:
-    build: ./GoToWorkCore
+    build:
+      context: .
+      dockerfile: GoToWorkCore/Dockerfile
 #    image: max1994/gotoworkparent-go-to-work:latest
     container_name: goToWorkCore
     ports:
@@ -20,7 +22,9 @@ services:
 #        max-size: 50m
 
   telegram-bot:
-    build: ./TelegramBot
+    build:
+      context: .
+      dockerfile: TelegramBot/Dockerfile
 #    image: max1994/gotoworkparent-telegram-bot:latest
     container_name: telegramBot
     ports:
