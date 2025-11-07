@@ -64,7 +64,7 @@ jobs:
           context: .
           file: ./TelegramBot/Dockerfile
           push: true
-          tags: overregistry.ru/overmoney-telegram-bot
+          tags: max1994/gotoworkparent-telegram-bot:latest
 
   copy-docker-compose:
     name: Copy docker-compose.yaml to server
