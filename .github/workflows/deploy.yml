@@ -9,7 +9,8 @@ env:
   GO_TO_WORK_IMAGE: max1994/gotoworkparent-go-to-work
   TELEGRAM_BOT_IMAGE: max1994/gotoworkparent-telegram-bot
   DOCKER_TAG: latest
-
+  SPRING_APPLICATION_PROFILE: prod
+  
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
