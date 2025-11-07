@@ -3,7 +3,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/go_to_work_db
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
-
+    driver-class-name: org.postgresql.Driver
 
   liquibase:
     change-log: classpath:db/changelog.xml
@@ -12,20 +12,18 @@ spring:
     show-sql: true
     open-in-view: false
 
-#  application:
-#    name: telegram-bot
-#
-#  profiles:
-#    active: ${SPRING_APPLICATION_PROFILE:dev}
-#
-#  logging:
-#    level:
-#      org.zalando.logbook: TRACE
+  application:
+    name: telegram-bot
+
+  profiles:
+    active: ${SPRING_APPLICATION_PROFILE:dev}
+
+logging:
+  level:
+    org.zalando.logbook: TRACE
 
 server:
   port: 8081
-
-#environment: ${ENVIRONMENT:dev}
 
 bot:
   token: ${BOT_TOKEN:8326413347:AAGF078sIq646SQafkaBgz1Eht9PQnciqAQ}

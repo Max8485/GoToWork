@@ -1,10 +1,10 @@
 version: '3'
 services:
   go-to-work:
-    build:
-      context: .
-      dockerfile: GoToWorkCore/Dockerfile
-#    image: max1994/gotoworkparent-go-to-work:latest
+#    build:
+#      context: .
+#      dockerfile: GoToWorkCore/Dockerfile
+    image: max1994/gotoworkparent-go-to-work:latest
     container_name: goToWorkCore
     ports:
       - "8080:8080"
@@ -14,18 +14,18 @@ services:
       DADATA_URL: https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address
       GRAPHHOOPER_API_KEY: ${GRAPHHOOPER_API_KEY}
       GRAPHHOOPER_URL: https://graphhopper.com/api/1/route
-#      SPRING_APPLICATION_PROFILE: ${SPRING_APPLICATION_PROFILE}
-#
-#    logging:
-#      driver: "json-file"
-#      options:
-#        max-size: 50m
+      SPRING_APPLICATION_PROFILE: ${SPRING_APPLICATION_PROFILE}
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 50m
 
   telegram-bot:
-    build:
-      context: .
-      dockerfile: TelegramBot/Dockerfile
-#    image: max1994/gotoworkparent-telegram-bot:latest
+#    build:
+#      context: .
+#      dockerfile: TelegramBot/Dockerfile
+    image: max1994/gotoworkparent-telegram-bot:latest
     container_name: telegramBot
     ports:
       - "8081:8081"
@@ -34,12 +34,12 @@ services:
       TELEGRAM_BOT_TOKEN: ${BOT_TOKEN}
       TELEGRAM_BOT_USERNAME: ${BOT_USERNAME}
       CORE_SERVICE_URL: http://go-to-work:8080/api/routes
-#      SPRING_APPLICATION_PROFILE: ${SPRING_APPLICATION_PROFILE}
-#
-#    logging:
-#      driver: "json-file"
-#      options:
-#        max-size: 50m
+      SPRING_APPLICATION_PROFILE: ${SPRING_APPLICATION_PROFILE}
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 50m
 
   postgres:
     image: postgres:13.1
@@ -47,8 +47,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-#
-#    logging:
-#      driver: "json-file"
-#      options:
-#        max-size: 50m
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 50m

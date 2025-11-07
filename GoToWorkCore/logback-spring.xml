@@ -2,7 +2,7 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
-        <springProperty scope="context" name="environment" source="environment"/>
+        <springProperty scope="context" name="environment" source="spring.profiles.active"/>
     <springProfile name="!dev">
         <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
             <destination>194.87.237.197:50000</destination>
@@ -17,7 +17,7 @@
                             {
                             "app": "go-to-work-core",
                             "message": "%message%n%ex{full}",
-                            "environment": "${environment}"
+                            "environment": "${spring.profiles.active}"
                             }
                         </pattern>
                     </pattern>

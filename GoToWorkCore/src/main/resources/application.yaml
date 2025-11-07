@@ -3,6 +3,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/go_to_work_db
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
 
   liquibase:
     change-log: classpath:db/changelog.xml
@@ -11,20 +12,18 @@ spring:
     show-sql: true
     open-in-view: false
 
-#  application:
-#    name: go-to-work-core
-#
-#  profiles:
-#    active: ${SPRING_APPLICATION_PROFILE:dev}
-#
-#  logging:
-#    level:
-#      org.zalando.logbook: TRACE
+  application:
+    name: go-to-work-core
+
+  profiles:
+    active: ${SPRING_APPLICATION_PROFILE:dev}
+
+logging:
+  level:
+    org.zalando.logbook: TRACE
 
 server:
   port: 8080
-
-#environment: ${ENVIRONMENT:dev}
 
 app:
   dadata:
