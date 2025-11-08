@@ -22,7 +22,6 @@ logging:
   level:
     org.zalando.logbook: TRACE
 
-
 server:
   port: 8080
 
