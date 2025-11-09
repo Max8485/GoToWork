@@ -50,7 +50,7 @@ jobs:
         if: needs.detect-changes.outputs.go-to-work == 'true'
         uses: docker/build-push-action@v4
         with:
-          context: ./GoToWorkCore
+          context: .
           file: ./GoToWorkCore/Dockerfile
           push: true
           tags: ${{ env.GO_TO_WORK_IMAGE }}:${{ env.DOCKER_TAG }}
@@ -61,7 +61,7 @@ jobs:
         if: needs.detect-changes.outputs.telegram-bot == 'true'
         uses: docker/build-push-action@v4
         with:
-          context: ./TelegramBot
+          context: .
           file: ./TelegramBot/Dockerfile
           push: true
           tags: ${{ env.TELEGRAM_BOT_IMAGE }}:${{ env.DOCKER_TAG }}
