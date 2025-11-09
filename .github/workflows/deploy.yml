@@ -16,17 +16,18 @@ jobs:
     outputs:
       go-to-work: ${{ steps.filter.outputs.go-to-work }}
       telegram-bot: ${{ steps.filter.outputs.telegram-bot }}
-      any-changed: ${{ steps.filter.outputs.any-changed }}
+      any-changed: ${{ steps.filter.outputs.go-to-work == 'true' || steps.filter.outputs.telegram-bot == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          base: ${{ github.ref }}
           filters: |
-            go-to-work: ['GoToWorkCore/**']
-            telegram-bot: ['TelegramBot/**']
-            
+            go-to-work:
+              - 'GoToWorkCore/**'
+            telegram-bot:
+              - 'TelegramBot/**'
+
   build-and-push-images:
     name: Build & Push images to DockerHub
     runs-on: ubuntu-latest
@@ -53,7 +54,7 @@ jobs:
           file: ./GoToWorkCore/Dockerfile
           push: true
           tags: ${{ env.GO_TO_WORK_IMAGE }}:${{ env.DOCKER_TAG }}
-          build-args:
+          build-args: |
             SPRING_PROFILES_ACTIVE=${{ env.SPRING_APPLICATION_PROFILE }}
 
       - name: Telegram Bot Build and Push
@@ -109,4 +110,3 @@ jobs:
             
             # Clean up unused images
             docker image prune -f
-
