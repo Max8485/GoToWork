@@ -5,7 +5,6 @@ on:
     branches: [ master ]
 
 env:
-  DOCKER_REGISTRY: max1994
   GO_TO_WORK_IMAGE: max1994/gotoworkparent-go-to-work
   TELEGRAM_BOT_IMAGE: max1994/gotoworkparent-telegram-bot
   DOCKER_TAG: latest
@@ -39,7 +38,6 @@ jobs:
       - name: Login to private Docker registry (max1994)
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ secrets.DOCKER_PRIVATE_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_PRIVATE_REGISTRY_PASSWORD }}
 
