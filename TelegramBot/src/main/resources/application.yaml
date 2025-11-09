@@ -18,7 +18,6 @@ spring:
   profiles:
     active: ${SPRING_APPLICATION_PROFILE:dev}
 
-
 logging:
   level:
     org.zalando.logbook: TRACE
