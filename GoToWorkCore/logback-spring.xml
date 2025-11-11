@@ -17,7 +17,7 @@
                             {
                             "app": "go-to-work-core",
                             "message": "%message%n%ex{full}",
-                            "environment": "${spring.profiles.active}"
+                            "environment": "${environment}"
                             }
                         </pattern>
                     </pattern>
