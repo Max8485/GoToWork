@@ -18,13 +18,14 @@ spring:
   profiles:
     active: ${SPRING_APPLICATION_PROFILE:dev}
 
+environment: ${ENVIRONMENT:dev}
+
 logging:
   level:
     org.zalando.logbook: TRACE
 
 server:
   port: 8080
-
 
 app:
   dadata:
