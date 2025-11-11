@@ -2,7 +2,7 @@ name: Deploy to Server
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
 
 env:
   GO_TO_WORK_IMAGE: max1994/gotoworkparent-go-to-work
@@ -16,17 +16,33 @@ jobs:
     outputs:
       go-to-work: ${{ steps.filter.outputs.go-to-work }}
       telegram-bot: ${{ steps.filter.outputs.telegram-bot }}
-      any-changed: ${{ steps.filter.outputs.any-changed }}
+      any-changed: ${{ steps.filter.outputs.go-to-work == 'true' || steps.filter.outputs.telegram-bot == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          base: ${{ github.ref }}
           filters: |
-            go-to-work: ['GoToWorkCore/**']
-            telegram-bot: ['TelegramBot/**']
-            
+            go-to-work:
+              - 'GoToWorkCore/**'
+            telegram-bot:
+              - 'TelegramBot/**'
+
+  copy-docker-compose:
+    name: Copy docker-compose.yaml to server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Copy docker-compose.yaml to server
+        uses: appleboy/scp-action@master
+        with:
+          host: "194.87.99.49"
+          username: "max"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: "docker-compose.yaml"
+          target: "/home/max"            
+
   build-and-push-images:
     name: Build & Push images to DockerHub
     runs-on: ubuntu-latest
@@ -49,35 +65,21 @@ jobs:
         if: needs.detect-changes.outputs.go-to-work == 'true'
         uses: docker/build-push-action@v4
         with:
-          context: ./GoToWorkCore
+          context: .
           file: ./GoToWorkCore/Dockerfile
           push: true
           tags: ${{ env.GO_TO_WORK_IMAGE }}:${{ env.DOCKER_TAG }}
-          build-args:
+          build-args: |
             SPRING_PROFILES_ACTIVE=${{ env.SPRING_APPLICATION_PROFILE }}
 
       - name: Telegram Bot Build and Push
         if: needs.detect-changes.outputs.telegram-bot == 'true'
         uses: docker/build-push-action@v4
         with:
-          context: ./TelegramBot
+          context: .
           file: ./TelegramBot/Dockerfile
           push: true
           tags: ${{ env.TELEGRAM_BOT_IMAGE }}:${{ env.DOCKER_TAG }}
-
-  copy-docker-compose:
-    name: Copy docker-compose.yaml to server
-    runs-on: ubuntu-latest
-    needs: [build-and-push-images]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "docker-compose.yaml"
-          target: "/home/${{ secrets.SERVER_USERNAME }}/app/"
 
   deploy:
     name: Deploy
@@ -86,11 +88,11 @@ jobs:
     steps:
       - uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: "194.87.99.49"
+          username: "max"
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/${{ secrets.SERVER_USERNAME }}/app/
+            cd /home/max/app/
             
             # Pull только измененных образов
             if [ "${{ needs.detect-changes.outputs.go-to-work }}" = "true" ]; then
@@ -109,4 +111,3 @@ jobs:
             
             # Clean up unused images
             docker image prune -f
-
