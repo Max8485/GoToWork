@@ -15,6 +15,7 @@ services:
       GRAPHHOOPER_API_KEY: ${GRAPHHOOPER_API_KEY}
       GRAPHHOOPER_URL: https://graphhopper.com/api/1/route
       SPRING_APPLICATION_PROFILE: prod
+      ENVIRONMENT: production
 
     logging:
       driver: "json-file"
@@ -35,6 +36,7 @@ services:
       TELEGRAM_BOT_USERNAME: ${BOT_USERNAME}
       CORE_SERVICE_URL: http://go-to-work:8080/api/routes
       SPRING_APPLICATION_PROFILE: prod
+      ENVIRONMENT: production
 
     logging:
       driver: "json-file"
