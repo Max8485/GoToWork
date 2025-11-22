@@ -1,4 +1,4 @@
-package org.maxsid.work.core.dto;
+package org.maxsid.work.dto;
 
 import lombok.*;
 
@@ -10,16 +10,6 @@ import lombok.*;
 @Builder
 public class RouteResponse {
 
-//    private Long id;
-//
-//    private String departureTime; //время отправления
-//
-//    private String travelDuration; //продолжительность пути
-//
-//    private String message;
-//
-//    private boolean success; //успех
-
     private Long userId;
 
     private String homeAddress;
@@ -28,9 +18,9 @@ public class RouteResponse {
 
     private String arrivalTime;
 
-    private Long travelDurationMinutes;
+    private Long travelDurationMinutes;  //продолжительность пути
 
-    private String recommendedDepartureTime;
+    private String recommendedDepartureTime; //время отправления
 
     private String message;
 
