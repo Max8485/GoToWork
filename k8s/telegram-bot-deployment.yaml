@@ -17,25 +17,25 @@ spec:
           name: telegram-bot
           ports:
             - containerPort: 8081
-      env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "docker"
-        - name: TELEGRAM_BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: app-secret
-              key: telegram-bot-token
-        - name: TELEGRAM_BOT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: app-secret
-              key: telegram-bot-username
-        - name: CORE_SERVICE_URL
-          value: "http://go-to-work:8080/api/routes"
-      resources:
-        requests:
-          memory: "256Mi"
-          cpu: "250m"
-        limits:
-          memory: "512Mi"
-          cpu: "500m"
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "docker"
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: telegram-bot-token
+            - name: TELEGRAM_BOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: telegram-bot-username
+            - name: CORE_SERVICE_URL
+              value: "http://go-to-work:8080/api/routes"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
