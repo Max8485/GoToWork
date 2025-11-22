@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: go-to-work
+spec:
+  containers:
+    - image: max1994/gotoworkparent-go-to-work:latest
+      name: go-to-work
+      ports:
+        - containerPort: 8080
+      env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "docker"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://194.87.99.49:5432/go_to_work_db"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: db-user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: db-password
+        - name: DADATA_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: dadata-api-key
+        - name: GRAPHHOOPER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: graphhooper-api-key
+        - name: DADATA_URL
+          value: "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address"
+        - name: GRAPHHOOPER_URL
+          value: "https://graphhopper.com/api/1/route"
+      resources:
+        requests:
+          memory: "512Mi"
+          cpu: "250m"
+        limits:
+          memory: "1Gi"
+          cpu: "500m"
