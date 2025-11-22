@@ -3,10 +3,16 @@ kind: Deployment
 metadata:
   name: go-to-work
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: go-to-work
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -14,6 +20,7 @@ spec:
     spec:
       containers:
         - image: max1994/gotoworkparent-go-to-work:latest
+          imagePullPolicy: Always
           name: go-to-work
           ports:
             - containerPort: 8080
@@ -53,3 +60,15 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10

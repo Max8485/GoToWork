@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: telegram-bot
 spec:
-  selector:
-    app: telegram-bot
+  type: LoadBalancer
   ports:
     - port: 8081
-      targetPort: 8081
       protocol: TCP
-  type: ClusterIP
+      targetPort: 8081
+  selector:
+    app: telegram-bot

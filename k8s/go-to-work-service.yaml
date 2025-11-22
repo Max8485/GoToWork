@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: go-to-work
 spec:
-  selector:
-    app: go-to-work
+  type: LoadBalancer
   ports:
     - port: 8080
-      targetPort: 8080
       protocol: TCP
-  type: ClusterIP
+      targetPort: 8080
+  selector:
+    app: go-to-work
