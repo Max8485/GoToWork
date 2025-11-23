@@ -16,7 +16,7 @@ spring:
     name: go-to-work-core
 
   profiles:
-    active: ${SPRING_APPLICATION_PROFILE:prod}
+    active: dev
 
 logging:
   level:
