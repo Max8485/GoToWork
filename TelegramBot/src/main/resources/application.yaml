@@ -16,7 +16,7 @@ spring:
     name: telegram-bot
 
   profiles:
-    active: dev
+    active: ${SPRING_APPLICATION_PROFILE:prod}
 logging:
   level:
     org.zalando.logbook: TRACE
