@@ -13,22 +13,18 @@ spring:
     open-in-view: false
 
   application:
-    name: go-to-work-core
+    name: telegram-bot
 
   profiles:
-    active: dev
-
+    active: ${SPRING_APPLICATION_PROFILE:prod}
 logging:
   level:
     org.zalando.logbook: TRACE
 
 server:
-  port: 8080
+  port: 8081
 
-app:
-  dadata:
-    api-key: ${DADATA_API_KEY:f0d7b7fbc70c8fd3baaa7a534539ef03c265e412}
-    url: https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address
-  graphhooper:
-    api-key: ${GRAPHHOOPER_API_KEY:443b290d-37b9-495d-b3bd-688e8e28ff1e}
-    url: https://graphhopper.com/api/1/route
+bot:
+  token: ${BOT_TOKEN:8326413347:AAGF078sIq646SQafkaBgz1Eht9PQnciqAQ}
+  username: ${BOT_USERNAME:go_to_work1_bot}
+  url: http://go-to-work:8080/api/routes
