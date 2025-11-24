@@ -3,7 +3,7 @@
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
         <springProperty scope="context" name="environment" source="ENVIRONMENT"/>
-    <springProfile name="!dev">
+<!--    <springProfile name="!dev">-->
         <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
             <destination>194.87.237.197:50000</destination>
             <encoder charset="UTF-8" class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
@@ -29,7 +29,7 @@
         <root level="info">
             <appender-ref ref="logstash"/>
         </root>
-    </springProfile>
+<!--    </springProfile>-->
 </configuration>
 
 <!--<configuration>-->
