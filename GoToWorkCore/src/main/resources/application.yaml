@@ -22,6 +22,12 @@ logging:
   level:
     org.zalando.logbook: TRACE
 
+##logging:
+##  config: classpath:logback-spring.xml
+##  level:
+##    root: info
+##
+
 server:
   port: 8080
 
