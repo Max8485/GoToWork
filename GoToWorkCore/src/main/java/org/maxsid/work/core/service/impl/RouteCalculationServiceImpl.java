@@ -3,23 +3,16 @@ package org.maxsid.work.core.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
+import org.maxsid.work.dto.RouteRequest;
+import org.maxsid.work.dto.RouteResponse;
 import org.maxsid.work.core.entity.UserSettings;
 import org.maxsid.work.core.repository.UserSettingsRepository;
-import org.maxsid.work.core.dto.RouteRequest;
-import org.maxsid.work.core.dto.RouteResponse;
 import org.maxsid.work.core.service.GeocodeService;
 import org.maxsid.work.core.service.RouteCalculationService;
 import org.maxsid.work.core.service.RouteService;
 import org.maxsid.work.core.utils.TimeUtils;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j

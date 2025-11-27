@@ -3,7 +3,6 @@ package org.maxsid.work.core.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
-import org.maxsid.work.core.model.GraphHopperResponse;
 import org.maxsid.work.core.service.RouteService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Locale;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -37,7 +35,7 @@ public class RouteServiceImpl implements RouteService {
                 .toUriString();
 
         try {
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class); //исправить!
             if (response.getBody() != null) {
                 Map<String, Object> body = response.getBody();
                 if (body.containsKey("paths") && ((java.util.List) body.get("paths")).size() > 0) {
