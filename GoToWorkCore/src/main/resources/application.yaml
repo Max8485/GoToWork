@@ -18,6 +18,20 @@ spring:
   profiles:
     active: ${SPRING_APPLICATION_PROFILE:prod}
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+#    consumer:
+#      group-id: go-to-work-core-service
+#      auto-offset-reset: earliest
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#      properties:
+#        spring.json.trusted.packages: "*"
+#        spring.json.type.mapping: kafkaMessage:org.maxsid.work.dto.KafkaMessage
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 logging:
   level:
     org.zalando.logbook: TRACE

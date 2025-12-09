@@ -3,6 +3,8 @@ package org.maxsid.work.core.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
+
+import org.maxsid.work.core.kafka.service.KafkaProducerService;
 import org.maxsid.work.dto.RouteRequest;
 import org.maxsid.work.dto.RouteResponse;
 import org.maxsid.work.core.entity.UserSettings;
@@ -11,6 +13,7 @@ import org.maxsid.work.core.service.GeocodeService;
 import org.maxsid.work.core.service.RouteCalculationService;
 import org.maxsid.work.core.service.RouteService;
 import org.maxsid.work.core.utils.TimeUtils;
+import org.maxsid.work.dto.UserSettingsDto;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -23,6 +26,8 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     private final GeocodeService geocodeService;
     private final RouteService routeService;
     private final UserSettingsRepository userSettingsRepository;
+    private final KafkaProducerService kafkaProducerService;
+
 
     @Override
     public RouteResponse calculateOptimalRoute(Long userId) {
@@ -50,7 +55,16 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
         String departureTime = TimeUtils.calculateDepartureTime(
                 userSettings.getArrivalTimeToWork(), travelMinutes);
 
-        return new RouteResponse(
+//        return new RouteResponse(
+//                userId,
+//                userSettings.getHomeAddress(),
+//                userSettings.getWorkAddress(),
+//                userSettings.getArrivalTimeToWork(),
+//                travelMinutes,
+//                departureTime
+//        );
+
+        RouteResponse response = new RouteResponse(
                 userId,
                 userSettings.getHomeAddress(),
                 userSettings.getWorkAddress(),
@@ -58,6 +72,10 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
                 travelMinutes,
                 departureTime
         );
+        // Отправка события в Kafka
+        kafkaProducerService.sendRouteCalculatedEvent(userId, response);
+
+        return response;
     }
 
     @Override
@@ -84,7 +102,22 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
             );
         }
 
-        return userSettingsRepository.save(userSettings);
+//        return userSettingsRepository.save(userSettings);
+
+        UserSettings savedSettings = userSettingsRepository.save(userSettings);
+
+        // Отправка события в Kafka
+        UserSettingsDto dto = UserSettingsDto.builder()
+                .userId(savedSettings.getUserId())
+                .homeAddress(savedSettings.getHomeAddress())
+                .workAddress(savedSettings.getWorkAddress())
+                .timeZone(savedSettings.getTimeZone())
+                .arrivalTimeToWork(savedSettings.getArrivalTimeToWork())
+                .build();
+
+        kafkaProducerService.sendUserSettingsSavedEvent(userId, dto);
+
+        return savedSettings;
     }
 
     @Override

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: telegram-bot
 spec:
-  replicas: 1
+  replicas: 1           #исправить на 2
   selector:
     matchLabels:
       app: telegram-bot
