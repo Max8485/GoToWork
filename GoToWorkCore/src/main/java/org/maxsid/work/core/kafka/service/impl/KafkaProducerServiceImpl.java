@@ -34,7 +34,7 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
             kafkaTemplate.send(message)
                     .whenComplete((result, ex) -> {
                         if (ex == null) {
-                            log.info("[Correlation: {}] Sent for user {}", correlationId, userId);
+                            log.info("[Correlation: {}] Настройки пользователя успешно отправлены{}", correlationId, userId);
                         } else {
                             log.error("[Correlation: {}] Failed for user {}", correlationId, userId, ex);
                         }
@@ -60,7 +60,7 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
             kafkaTemplate.send(message)
                     .whenComplete((result, ex) -> {
                         if (ex == null) {
-                            log.info("[Correlation: {}] Sent for route calculate {}", correlationId, userId);
+                            log.info("[Correlation: {}] Расчет маршрута для пользователя успешно отправлен{}", correlationId, userId);
                         } else {
                             log.error("[Correlation: {}] Failed for route calculate{}", correlationId, userId, ex);
                         }

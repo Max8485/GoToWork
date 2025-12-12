@@ -27,7 +27,7 @@ public class KafkaConsumerServiceImpl implements KafkaConsumerService {
             @Payload UserSettingsDto userSettingsDto,
             @Header(KafkaHeaders.RECEIVED_KEY) String userId) {
 
-        log.info(">>> Received user settings for user: {}", userId);
+        log.info(">>> Получены настройки пользователя для userId: {}", userId);
 
         String notification = String.format("""
                         ✅ Настройки успешно синхронизированы!
@@ -52,7 +52,7 @@ public class KafkaConsumerServiceImpl implements KafkaConsumerService {
             @Payload RouteResponse routeResponse,
             @Header(KafkaHeaders.RECEIVED_KEY) String userId) {
 
-        log.info(">>> Received route calculation for userId: {}", userId);
+        log.info(">>> Получен расчет маршрута для userId: {}", userId);
 
         String notification = String.format("""
                 🚗 Маршрут рассчитан системой:

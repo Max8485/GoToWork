@@ -3,16 +3,15 @@ package org.maxsid.work.core.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
-
-import org.maxsid.work.core.kafka.service.KafkaProducerService;
-import org.maxsid.work.dto.RouteRequest;
-import org.maxsid.work.dto.RouteResponse;
 import org.maxsid.work.core.entity.UserSettings;
+import org.maxsid.work.core.kafka.service.KafkaProducerService;
 import org.maxsid.work.core.repository.UserSettingsRepository;
 import org.maxsid.work.core.service.GeocodeService;
 import org.maxsid.work.core.service.RouteCalculationService;
 import org.maxsid.work.core.service.RouteService;
 import org.maxsid.work.core.utils.TimeUtils;
+import org.maxsid.work.dto.RouteRequest;
+import org.maxsid.work.dto.RouteResponse;
 import org.maxsid.work.dto.UserSettingsDto;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +27,9 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     private final UserSettingsRepository userSettingsRepository;
     private final KafkaProducerService kafkaProducerService;
 
-
     @Override
     public RouteResponse calculateOptimalRoute(Long userId) {
-        Optional<UserSettings> userSettingsOpt = userSettingsRepository.findByUserId(userId);
+        Optional<UserSettings> userSettingsOpt = userSettingsRepository.findByUserId(userId).stream().findFirst();
         if (userSettingsOpt.isEmpty()) {
             throw new IllegalArgumentException("User settings not found for user id: " + userId);
         }
@@ -55,15 +53,6 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
         String departureTime = TimeUtils.calculateDepartureTime(
                 userSettings.getArrivalTimeToWork(), travelMinutes);
 
-//        return new RouteResponse(
-//                userId,
-//                userSettings.getHomeAddress(),
-//                userSettings.getWorkAddress(),
-//                userSettings.getArrivalTimeToWork(),
-//                travelMinutes,
-//                departureTime
-//        );
-
         RouteResponse response = new RouteResponse(
                 userId,
                 userSettings.getHomeAddress(),
@@ -81,17 +70,22 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     @Override
     public UserSettings saveUserSettings(Long userId, RouteRequest request) {
         // Проверяем существующие настройки
-        Optional<UserSettings> existingSettings = userSettingsRepository.findByUserId(userId);
+        Optional<UserSettings> existingSettings = userSettingsRepository.findByUserId(userId).stream().findFirst();
 
         UserSettings userSettings;
         if (existingSettings.isPresent()) {
-            // Обновляем существующие настройки
             userSettings = existingSettings.get();
+            log.info(">>> Updating existing settings for user {} (ID: {})",
+                    userId, userSettings.getId());
+            // Обновляем существующие настройки
+
             userSettings.setHomeAddress(request.getHomeAddress());
             userSettings.setWorkAddress(request.getWorkAddress());
             userSettings.setTimeZone(request.getTimeZone());
             userSettings.setArrivalTimeToWork(request.getArrivalTime());
         } else {
+            // Создаем НОВУЮ запись только если ее нет
+            log.info(">>> Creating new settings for user {}", userId);
             // Создаем новые настройки
             userSettings = new UserSettings(
                     userId,
@@ -101,8 +95,6 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
                     request.getArrivalTime()
             );
         }
-
-//        return userSettingsRepository.save(userSettings);
 
         UserSettings savedSettings = userSettingsRepository.save(userSettings);
 

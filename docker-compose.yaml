@@ -1,10 +1,10 @@
 version: '3'
 services:
   go-to-work:
-    build:
-      context: .
-      dockerfile: GoToWorkCore/Dockerfile
-#    image: max1994/gotoworkparent-go-to-work:latest
+#    build:
+#      context: .
+#      dockerfile: GoToWorkCore/Dockerfile
+    image: max1994/gotoworkparent-go-to-work:latest
     container_name: goToWorkCore
     ports:
       - "8080:8080"
@@ -24,10 +24,10 @@ services:
         max-size: 50m
 
   telegram-bot:
-    build:
-      context: .
-      dockerfile: TelegramBot/Dockerfile
-#    image: max1994/gotoworkparent-telegram-bot:latest
+#    build:
+#      context: .
+#      dockerfile: TelegramBot/Dockerfile
+    image: max1994/gotoworkparent-telegram-bot:latest
     container_name: telegramBot
     ports:
       - "8081:8081"
@@ -78,6 +78,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"  # для контейнеров
-      - "9093:9093"  # для хоста (ваш компьютер)
+      - "9093:9093"  # для хоста (мой компьютер)
     depends_on:
       - zookeeper

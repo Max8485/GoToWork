@@ -30,10 +30,9 @@ spring:
         spring.json.type.mapping: >
           userSettingsDto:org.maxsid.work.dto.UserSettingsDto,
           routeResponse:org.maxsid.work.dto.RouteResponse
-#    producer:
-#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 logging:
   level:

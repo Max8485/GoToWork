@@ -23,23 +23,23 @@ public class DebugKafkaController {
         return ResponseEntity.ok("Test message sent to user-settings-topic");
     }
 
-    @PostMapping("/send/route-calculated/{userId}")
-    public ResponseEntity<String> testSendRouteCalculated(
-            @PathVariable Long userId) {
-
-        RouteResponse routeResponse = RouteResponse.builder()
-                .userId(userId)
-                .homeAddress("Test Home")
-                .workAddress("Test Work")
-                .arrivalTime("09:00")
-                .travelDurationMinutes(45L)
-                .recommendedDepartureTime("08:15")
-                .message("Test route calculated")
-                .build();
-
-        kafkaProducerService.sendRouteCalculatedEvent(userId, routeResponse);
-        return ResponseEntity.ok("Test message sent to route-calculated-topic");
-    }
+//    @PostMapping("/send/route-calculated/{userId}")
+//    public ResponseEntity<String> testSendRouteCalculated(
+//            @PathVariable Long userId) {
+//
+//        RouteResponse routeResponse = RouteResponse.builder()
+//                .userId(userId)
+//                .homeAddress("Test Home")
+//                .workAddress("Test Work")
+//                .arrivalTime("09:00")
+//                .travelDurationMinutes(45L)
+//                .recommendedDepartureTime("08:15")
+//                .message("Test route calculated")
+//                .build();
+//
+//        kafkaProducerService.sendRouteCalculatedEvent(userId, routeResponse);
+//        return ResponseEntity.ok("Test message sent to route-calculated-topic");
+//    }
 
     @GetMapping("/health")
     public ResponseEntity<String> health() {
