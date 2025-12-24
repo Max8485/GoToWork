@@ -6,7 +6,10 @@ networks:
 
 services:
   go-to-work:
-    image: max1994/gotoworkparent-go-to-work:latest
+    build:
+      context: .
+      dockerfile: GoToWorkCore/Dockerfile
+#    image: max1994/gotoworkparent-go-to-work:latest
     container_name: goToWorkCore
     networks:
       - app-network
@@ -18,7 +21,7 @@ services:
       DADATA_URL: https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address
       GRAPHHOOPER_API_KEY: ${GRAPHHOOPER_API_KEY}
       GRAPHHOOPER_URL: https://graphhopper.com/api/1/route
-#      SPRING_APPLICATION_PROFILE: prod
+      #      SPRING_APPLICATION_PROFILE: prod
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       ENVIRONMENT: production
 
@@ -28,18 +31,21 @@ services:
         max-size: 50m
 
   telegram-bot:
-    image: max1994/gotoworkparent-telegram-bot:latest
+    build:
+      context: .
+      dockerfile: TelegramBot/Dockerfile
+#    image: max1994/gotoworkparent-telegram-bot:latest
     container_name: telegramBot
     networks:
       - app-network
     ports:
       - "8081:8081"
     environment:
-#      SPRING_PROFILES_ACTIVE: prod
+      #      SPRING_PROFILES_ACTIVE: prod
       TELEGRAM_BOT_TOKEN: ${BOT_TOKEN}
       TELEGRAM_BOT_USERNAME: ${BOT_USERNAME}
       CORE_SERVICE_URL: http://go-to-work:8080/api/routes
-#      SPRING_APPLICATION_PROFILE: prod
+      #      SPRING_APPLICATION_PROFILE: prod
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       ENVIRONMENT: production
 
@@ -81,11 +87,12 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
-      - "9092:9092"
+      - "9092:9092"  # для контейнеров
+      - "9093:9093"  # для хоста (мой компьютер)
     depends_on:
       - zookeeper
