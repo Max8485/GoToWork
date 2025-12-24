@@ -1,17 +1,47 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/go_to_work_db
-    username: postgres
-    password: postgres
-
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
 
   liquibase:
     change-log: classpath:db/changelog.xml
+
+  jpa:
+    show-sql: true
+    open-in-view: false
+
+  application:
+    name: telegram-bot
+
+  profiles:
+    active: ${SPRING_APPLICATION_PROFILE:prod}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: telegram-bot-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: >
+          userSettingsDto:org.maxsid.work.dto.UserSettingsDto,
+          routeResponse:org.maxsid.work.dto.RouteResponse
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+logging:
+  level:
+    org.zalando.logbook: TRACE
 
 server:
   port: 8081
 
 bot:
-  token: 8326413347:AAGF078sIq646SQafkaBgz1Eht9PQnciqAQ
-  username: go_to_work1_bot
-  url: http://localhost:8080/api/routes
+  token: ${BOT_TOKEN:8326413347:AAGF078sIq646SQafkaBgz1Eht9PQnciqAQ}
+  username: ${BOT_USERNAME:go_to_work1_bot}
+  url: http://go-to-work:8080/api/routes

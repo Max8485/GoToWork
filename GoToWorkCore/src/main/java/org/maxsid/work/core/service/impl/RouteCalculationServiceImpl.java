@@ -4,22 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
 import org.maxsid.work.core.entity.UserSettings;
+import org.maxsid.work.core.kafka.service.KafkaProducerService;
 import org.maxsid.work.core.repository.UserSettingsRepository;
-import org.maxsid.work.core.dto.RouteRequest;
-import org.maxsid.work.core.dto.RouteResponse;
 import org.maxsid.work.core.service.GeocodeService;
 import org.maxsid.work.core.service.RouteCalculationService;
 import org.maxsid.work.core.service.RouteService;
 import org.maxsid.work.core.utils.TimeUtils;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.maxsid.work.dto.RouteRequest;
+import org.maxsid.work.dto.RouteResponse;
+import org.maxsid.work.dto.UserSettingsDto;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -30,10 +25,11 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     private final GeocodeService geocodeService;
     private final RouteService routeService;
     private final UserSettingsRepository userSettingsRepository;
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     public RouteResponse calculateOptimalRoute(Long userId) {
-        Optional<UserSettings> userSettingsOpt = userSettingsRepository.findByUserId(userId);
+        Optional<UserSettings> userSettingsOpt = userSettingsRepository.findByUserId(userId).stream().findFirst();
         if (userSettingsOpt.isEmpty()) {
             throw new IllegalArgumentException("User settings not found for user id: " + userId);
         }
@@ -57,7 +53,7 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
         String departureTime = TimeUtils.calculateDepartureTime(
                 userSettings.getArrivalTimeToWork(), travelMinutes);
 
-        return new RouteResponse(
+        RouteResponse response = new RouteResponse(
                 userId,
                 userSettings.getHomeAddress(),
                 userSettings.getWorkAddress(),
@@ -65,22 +61,31 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
                 travelMinutes,
                 departureTime
         );
+        // Отправка события в Kafka
+        kafkaProducerService.sendRouteCalculatedEvent(userId, response);
+
+        return response;
     }
 
     @Override
     public UserSettings saveUserSettings(Long userId, RouteRequest request) {
         // Проверяем существующие настройки
-        Optional<UserSettings> existingSettings = userSettingsRepository.findByUserId(userId);
+        Optional<UserSettings> existingSettings = userSettingsRepository.findByUserId(userId).stream().findFirst();
 
         UserSettings userSettings;
         if (existingSettings.isPresent()) {
-            // Обновляем существующие настройки
             userSettings = existingSettings.get();
+            log.info(">>> Updating existing settings for user {} (ID: {})",
+                    userId, userSettings.getId());
+            // Обновляем существующие настройки
+
             userSettings.setHomeAddress(request.getHomeAddress());
             userSettings.setWorkAddress(request.getWorkAddress());
             userSettings.setTimeZone(request.getTimeZone());
             userSettings.setArrivalTimeToWork(request.getArrivalTime());
         } else {
+            // Создаем НОВУЮ запись только если ее нет
+            log.info(">>> Creating new settings for user {}", userId);
             // Создаем новые настройки
             userSettings = new UserSettings(
                     userId,
@@ -91,7 +96,20 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
             );
         }
 
-        return userSettingsRepository.save(userSettings);
+        UserSettings savedSettings = userSettingsRepository.save(userSettings);
+
+        // Отправка события в Kafka
+        UserSettingsDto dto = UserSettingsDto.builder()
+                .userId(savedSettings.getUserId())
+                .homeAddress(savedSettings.getHomeAddress())
+                .workAddress(savedSettings.getWorkAddress())
+                .timeZone(savedSettings.getTimeZone())
+                .arrivalTimeToWork(savedSettings.getArrivalTimeToWork())
+                .build();
+
+        kafkaProducerService.sendUserSettingsSavedEvent(userId, dto);
+
+        return savedSettings;
     }
 
     @Override
