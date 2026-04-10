@@ -1,7 +1,8 @@
 package org.maxsid.work.bot.controller;
 
-import org.maxsid.work.core.dto.RouteRequest;
-import org.maxsid.work.bot.service.CoreServiceClient;
+import lombok.extern.slf4j.Slf4j;
+import org.maxsid.work.bot.kafka.service.KafkaProducerService;
+import org.maxsid.work.dto.RouteRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -15,14 +16,15 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class TransportBot extends TelegramLongPollingBot {
 
     private final String botToken;
     private final String botUsername;
-    private final CoreServiceClient coreServiceClient;
     private final Map<Long, UserState> userStates;
     private final Map<Long, RouteRequest> tempSettings;
+    private final KafkaProducerService kafkaProducerService;
 
     private enum UserState {
         IDLE,
@@ -32,12 +34,11 @@ public class TransportBot extends TelegramLongPollingBot {
     }
 
     public TransportBot(@Value("${bot.token}") String botToken,
-                        @Value("${bot.username}") String botUsername,
-                        CoreServiceClient coreServiceClient) {
+                        @Value("${bot.username}") String botUsername, KafkaProducerService kafkaProducerService) {
         super(botToken);
         this.botToken = botToken;
         this.botUsername = botUsername;
-        this.coreServiceClient = coreServiceClient;
+        this.kafkaProducerService = kafkaProducerService;
         this.userStates = new HashMap<>();
         this.tempSettings = new HashMap<>();
     }
@@ -177,28 +178,31 @@ public class TransportBot extends TelegramLongPollingBot {
             RouteRequest settings = tempSettings.get(chatId);
             settings.setArrivalTime(workTime.format(DateTimeFormatter.ofPattern("HH:mm")));
 
-            // Сохраняем настройки в core service
-            coreServiceClient.saveUserSettings(chatId, settings);
+            //Отправляем через KAFKA
+            kafkaProducerService.sendUserSettingsToCore(chatId, settings);
 
             userStates.put(chatId, UserState.IDLE);
-            tempSettings.remove(chatId);
+//            tempSettings.remove(chatId);
 
-            String confirmationText = String.format("""
-                            ✅ Настройки успешно сохранены!
+//            String confirmationText = String.format("""
+//                            ✅ Настройки успешно сохранены!
+//
+//                            🏠 Домашний адрес: %s
+//                            🏢 Рабочий адрес: %s
+//                            ⏰ Время прибытия: %s
+//                            🌍 Часовой пояс: %s
+//
+//                            Теперь используйте команду /calculate для расчета времени выезда.
+//                            """,
+//                    settings.getHomeAddress(),
+//                    settings.getWorkAddress(),
+//                    settings.getArrivalTime(),
+//                    settings.getTimeZone());
+//
+//            sendMessage(chatId, confirmationText);
 
-                            🏠 Домашний адрес: %s
-                            🏢 Рабочий адрес: %s
-                            ⏰ Время прибытия: %s
-                            🌍 Часовой пояс: %s
-
-                            Теперь используйте команду /calculate для расчета времени выезда.
-                            """,
-                    settings.getHomeAddress(),
-                    settings.getWorkAddress(),
-                    settings.getArrivalTime(),
-                    settings.getTimeZone());
-
-            sendMessage(chatId, confirmationText);
+            // Вместо этого отправляем сообщение о том, что запрос отправлен
+            sendMessage(chatId, "⏳ Настройки отправлены на обработку. Вы получите уведомление, когда они будут сохранены.");
 
         } catch (DateTimeParseException e) {
             sendMessage(chatId, "❌ Неверный формат времени. Введите время в формате ЧЧ:MM (например 9:00 или 09:00):");
@@ -207,13 +211,23 @@ public class TransportBot extends TelegramLongPollingBot {
 
     private void calculateRoute(Long chatId) {
         try {
-            var response = coreServiceClient.calculateRoute(chatId);
+            RouteRequest routeRequest = tempSettings.get(chatId);
 
-            if (response.getMessage() != null && !response.getMessage().isEmpty()) {
-                sendMessage(chatId, response.getMessage());
-            } else {
-                sendMessage(chatId, "❌ Не удалось рассчитать маршрут. Проверьте настройки командой /settings");
-            }
+            //отправляем запрос через KAFKA
+            kafkaProducerService.sendRouteCalculationRequestToCore(chatId, routeRequest);
+
+//            var response = coreServiceClient.calculateRoute(chatId);
+//
+//            if (response.getMessage() != null && !response.getMessage().isEmpty()) {
+//                sendMessage(chatId, response.getMessage());
+//            } else {
+//                sendMessage(chatId, "❌ Не удалось рассчитать маршрут. Проверьте настройки командой /settings");
+//            }
+
+            tempSettings.remove(chatId);
+
+            // Вместо этого:
+            sendMessage(chatId, "⏳ Запрос на расчет маршрута отправлен. Вы получите уведомление, когда расчет будет завершен.");
 
         } catch (Exception e) {
             sendMessage(chatId, "❌ Сначала настройте маршрут с помощью команды /settings");

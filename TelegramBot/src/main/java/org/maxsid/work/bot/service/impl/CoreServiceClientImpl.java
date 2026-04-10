@@ -1,14 +1,15 @@
 package org.maxsid.work.bot.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.maxsid.work.core.dto.RouteRequest;
-import org.maxsid.work.core.dto.RouteResponse;
 import org.maxsid.work.bot.service.CoreServiceClient;
+import org.maxsid.work.dto.RouteRequest;
+import org.maxsid.work.dto.RouteResponse;
+import org.maxsid.work.dto.UserSettingsDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.maxsid.work.core.entity.UserSettings;
+
 
 @RequiredArgsConstructor
 @Service
@@ -20,9 +21,9 @@ public class CoreServiceClientImpl implements CoreServiceClient {
     private final RestTemplate restTemplate;
 
     @Override
-    public UserSettings saveUserSettings(Long userId, RouteRequest request) {
+    public UserSettingsDto saveUserSettings(Long userId, RouteRequest request) {
         String url = coreServiceUrl + "/users/" + userId + "/settings";
-        ResponseEntity<UserSettings> response = restTemplate.postForEntity(url, request, UserSettings.class);
+        ResponseEntity<UserSettingsDto> response = restTemplate.postForEntity(url, request, UserSettingsDto.class);
         return response.getBody();
     }
 
@@ -34,9 +35,9 @@ public class CoreServiceClientImpl implements CoreServiceClient {
     }
 
     @Override
-    public UserSettings getUserSettings(Long userId) {
+    public UserSettingsDto getUserSettings(Long userId) {
         String url = coreServiceUrl + "/users/" + userId + "/settings";
-        ResponseEntity<UserSettings> response = restTemplate.getForEntity(url, UserSettings.class);
+        ResponseEntity<UserSettingsDto> response = restTemplate.getForEntity(url, UserSettingsDto.class);
         return response.getBody();
     }
 }
