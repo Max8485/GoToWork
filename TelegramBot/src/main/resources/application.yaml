@@ -19,7 +19,7 @@ spring:
     active: ${SPRING_APPLICATION_PROFILE:prod}
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093} #не забудь исправить на kafka:9092 - для docker
     consumer:
       group-id: telegram-bot-service
       auto-offset-reset: earliest

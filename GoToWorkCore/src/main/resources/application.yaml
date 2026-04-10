@@ -19,7 +19,7 @@ spring:
     active: ${SPRING_APPLICATION_PROFILE:prod}
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093} #kafka:9092 - для docker
     consumer:
       group-id: go-to-work-core-service
       auto-offset-reset: earliest
@@ -32,12 +32,21 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
+  task:
+    scheduling:
+      pool:
+        size: 5
+
 logging:
   level:
     org.zalando.logbook: TRACE
 
 server:
   port: 8080
+
+telegram:
+  bot:
+    url: ${TELEGRAM_BOT_URL:http://telegram-bot:8081}
 
 app:
   dadata:
