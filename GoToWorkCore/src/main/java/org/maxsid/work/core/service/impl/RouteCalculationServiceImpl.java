@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
 import org.maxsid.work.core.entity.UserSettings;
+import org.maxsid.work.core.exceptions.FailedToSaveUserSettingsException;
+import org.maxsid.work.core.exceptions.UserSettingsNotFoundException;
 import org.maxsid.work.core.kafka.service.KafkaProducerService;
 import org.maxsid.work.core.repository.UserSettingsRepository;
 import org.maxsid.work.core.service.GeocodeService;
@@ -29,12 +31,8 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
 
     @Override
     public RouteResponse calculateOptimalRoute(Long userId) {
-        Optional<UserSettings> userSettingsOpt = userSettingsRepository.findByUserId(userId).stream().findFirst();
-        if (userSettingsOpt.isEmpty()) {
-            throw new IllegalArgumentException("User settings not found for user id: " + userId);
-        }
-
-        UserSettings userSettings = userSettingsOpt.get();
+        UserSettings userSettings = userSettingsRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserSettingsNotFoundException(userId));
 
 //        // Проверяем, будний ли день, работает!
 //        if (!TimeUtils.isWeekday()) {
@@ -69,47 +67,74 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
 
     @Override
     public UserSettings saveUserSettings(Long userId, RouteRequest request) {
-        // Проверяем существующие настройки
-        Optional<UserSettings> existingSettings = userSettingsRepository.findByUserId(userId).stream().findFirst();
+        try { //try catch - Тоже новый код.
+            // Проверяем существующие настройки. Если есть - обновляем, если нет - создаем новые.
+            UserSettings userSettings = userSettingsRepository.findByUserId(userId)
+                    .map(currentSettings -> {
+                        //обновляем настройки
+                        currentSettings.setHomeAddress(request.getHomeAddress()); //здесь мы перезаписываем текущие настройки маршрута, поэтому только один адрес всегда
+                        currentSettings.setWorkAddress(request.getWorkAddress()); //надо проверить с разных аккаунтов
+                        currentSettings.setTimeZone(request.getTimeZone());
+                        currentSettings.setArrivalTimeToWork(request.getArrivalTime());
 
-        UserSettings userSettings;
-        if (existingSettings.isPresent()) {
-            userSettings = existingSettings.get();
-            log.info(">>> Updating existing settings for user {} (ID: {})",
-                    userId, userSettings.getId());
-            // Обновляем существующие настройки
+                        return currentSettings;
+                    })
+                    .orElseGet(() -> { //orElseGet() - выполняется, если значения нет
+                        // если настроек НЕТ, создаем НОВУЮ запись
+                        return new UserSettings(
+                                userId,
+                                request.getHomeAddress(),
+                                request.getWorkAddress(),
+                                request.getTimeZone() != null ? request.getTimeZone() : "Europe/Moscow",
+                                request.getArrivalTime()
+                        );
+                    });
 
-            userSettings.setHomeAddress(request.getHomeAddress());
-            userSettings.setWorkAddress(request.getWorkAddress());
-            userSettings.setTimeZone(request.getTimeZone());
-            userSettings.setArrivalTimeToWork(request.getArrivalTime());
-        } else {
-            // Создаем НОВУЮ запись только если ее нет
-            log.info(">>> Creating new settings for user {}", userId);
-            // Создаем новые настройки
-            userSettings = new UserSettings(
-                    userId,
-                    request.getHomeAddress(),
-                    request.getWorkAddress(),
-                    request.getTimeZone() != null ? request.getTimeZone() : "Europe/Moscow",
-                    request.getArrivalTime()
-            );
+
+//        Optional<UserSettings> existingSettings = userSettingsRepository.findByUserId(userId).stream().findFirst();
+//
+//        UserSettings userSettings;
+//        if (existingSettings.isPresent()) {
+//            userSettings = existingSettings.get();
+//            log.info(">>> Updating existing settings for user {} (ID: {})",
+//                    userId, userSettings.getId());
+//            // Обновляем существующие настройки
+//
+//            userSettings.setHomeAddress(request.getHomeAddress()); //здесь мы перезаписываем текущие настройки маршрута, поэтому только один адрес всегда
+//            userSettings.setWorkAddress(request.getWorkAddress()); //надо проверить с разных аккаунтов
+//            userSettings.setTimeZone(request.getTimeZone());
+//            userSettings.setArrivalTimeToWork(request.getArrivalTime());
+//        } else {
+//            // Создаем НОВУЮ запись только если ее нет
+//            log.info(">>> Creating new settings for user {}", userId);
+//            // Создаем новые настройки
+//            userSettings = new UserSettings(
+//                    userId,
+//                    request.getHomeAddress(),
+//                    request.getWorkAddress(),
+//                    request.getTimeZone() != null ? request.getTimeZone() : "Europe/Moscow",
+//                    request.getArrivalTime()
+//            );
+//        }
+
+            UserSettings savedSettings = userSettingsRepository.save(userSettings);
+
+            // Отправка события в Kafka
+            UserSettingsDto dto = UserSettingsDto.builder()
+                    .userId(savedSettings.getUserId())
+                    .homeAddress(savedSettings.getHomeAddress())
+                    .workAddress(savedSettings.getWorkAddress())
+                    .timeZone(savedSettings.getTimeZone())
+                    .arrivalTimeToWork(savedSettings.getArrivalTimeToWork())
+                    .build();
+
+            kafkaProducerService.sendUserSettingsSavedEvent(userId, dto);
+
+            return savedSettings;
+
+        }catch (Exception e) {
+            throw new FailedToSaveUserSettingsException(userId, e);
         }
-
-        UserSettings savedSettings = userSettingsRepository.save(userSettings);
-
-        // Отправка события в Kafka
-        UserSettingsDto dto = UserSettingsDto.builder()
-                .userId(savedSettings.getUserId())
-                .homeAddress(savedSettings.getHomeAddress())
-                .workAddress(savedSettings.getWorkAddress())
-                .timeZone(savedSettings.getTimeZone())
-                .arrivalTimeToWork(savedSettings.getArrivalTimeToWork())
-                .build();
-
-        kafkaProducerService.sendUserSettingsSavedEvent(userId, dto);
-
-        return savedSettings;
     }
 
     @Override
