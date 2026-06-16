@@ -87,7 +87,7 @@ class RouteCalculationServiceImplTest {
             timeUtilsMockedStatic.when(() -> TimeUtils.calculateDepartureTime(userSettings.getArrivalTimeToWork(), travelMinutes))
                     .thenReturn(expectedDepartureTime);
 
-            RouteResponse routeResponse = routeCalculationService.calculateOptimalRoute(TEST_USER_ID);
+            RouteResponse routeResponse = routeCalculationService.calculateOptimalRoute(TEST_USER_ID, true);
 
             assertThat(routeResponse).isNotNull();
             assertThat(routeResponse.getUserId()).isEqualTo(TEST_USER_ID);

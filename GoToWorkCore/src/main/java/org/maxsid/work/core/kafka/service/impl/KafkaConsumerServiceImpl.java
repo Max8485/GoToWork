@@ -70,7 +70,7 @@ public class KafkaConsumerServiceImpl {
             log.info(" Запрос на расчет маршрута получен: {}", routeRequest);
 
             // Выполняем расчет маршрута
-            routeCalculationService.calculateOptimalRoute(userId);
+            routeCalculationService.calculateOptimalRoute(userId, true); /// ✅ true - отправляем в Kafka
             log.info(">>> [GoToWorkCore] Маршрут успешно рассчитан для userId: {}", userId);
 
         } catch (Exception e) {

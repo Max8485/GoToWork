@@ -37,6 +37,14 @@ spring:
       pool:
         size: 5
 
+shedlock:
+  defaults:
+    lock-at-most-for: 2m
+    lock-at-least-for: 1m
+  jdbc:
+    table-name: schedlock
+    dialect: postgresql
+
 logging:
   level:
     org.zalando.logbook: TRACE
@@ -46,7 +54,8 @@ server:
 
 telegram:
   bot:
-    url: ${TELEGRAM_BOT_URL:http://telegram-bot:8081}
+#    url: ${TELEGRAM_BOT_URL:http://telegram-bot:8081}
+    url: ${TELEGRAM_BOT_URL:http://localhost:8081}
 
 app:
   dadata:

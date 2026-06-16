@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface RouteCalculationService {
 
-    RouteResponse calculateOptimalRoute(Long userId);
+    RouteResponse calculateOptimalRoute(Long userId, boolean sendToKafka);
 
     UserSettings saveUserSettings(Long userId, RouteRequest request);
 

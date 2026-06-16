@@ -30,7 +30,7 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     private final KafkaProducerService kafkaProducerService;
 
     @Override
-    public RouteResponse calculateOptimalRoute(Long userId) {
+    public RouteResponse calculateOptimalRoute(Long userId, boolean sendToKafka) { // добавили  boolean sendToKafka
         UserSettings userSettings = userSettingsRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserSettingsNotFoundException(userId));
 
@@ -59,8 +59,13 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
                 travelMinutes,
                 departureTime
         );
-        // Отправка события в Kafka
-        kafkaProducerService.sendRouteCalculatedEvent(userId, response);
+
+        if (sendToKafka) {  //новый код от дублей сообщений в боте от кафки
+            // Отправка события в Kafka
+            kafkaProducerService.sendRouteCalculatedEvent(userId, response);
+        }
+//        // Отправка события в Kafka
+//        kafkaProducerService.sendRouteCalculatedEvent(userId, response);
 
         return response;
     }

@@ -2,9 +2,7 @@ package org.maxsid.work.bot.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.maxsid.work.bot.service.CoreServiceClient;
-import org.maxsid.work.dto.RouteRequest;
-import org.maxsid.work.dto.RouteResponse;
-import org.maxsid.work.dto.UserSettingsDto;
+import org.maxsid.work.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +36,13 @@ public class CoreServiceClientImpl implements CoreServiceClient {
     public UserSettingsDto getUserSettings(Long userId) {
         String url = coreServiceUrl + "/users/" + userId + "/settings";
         ResponseEntity<UserSettingsDto> response = restTemplate.getForEntity(url, UserSettingsDto.class);
+        return response.getBody();
+    }
+
+    @Override
+    public EnableNotificationsDto enableNotifications(Long userId, boolean enabled) {
+        String url = coreServiceUrl + "/users/" + userId + "/notifications?enabled=" + enabled;
+        ResponseEntity<EnableNotificationsDto> response = restTemplate.postForEntity(url, null, EnableNotificationsDto.class);
         return response.getBody();
     }
 }

@@ -19,8 +19,7 @@ public class TimeUtils {
     public static String calculateDepartureTime(String arrivalTime, long travelMinutes) {
         LocalTime arrival = parseTime(arrivalTime);
         LocalTime departure = arrival
-                .minusMinutes(travelMinutes)
-                .minusMinutes(30); // 30 минут буфер
+                .minusMinutes(travelMinutes);
 
         return formatTime(departure);
     }

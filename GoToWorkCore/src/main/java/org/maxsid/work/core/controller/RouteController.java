@@ -20,25 +20,24 @@ public class RouteController {
     private final RouteCalculationService routeCalculationService;
     private final UserSettingsMapper userSettingsMapper;
 
-    @PostMapping("/users/{userId}/settings") //работает
+    @PostMapping("/users/{userId}/settings")
     public ResponseEntity<UserSettingsDto> saveUserSettings(
             @PathVariable Long userId,
             @RequestBody RouteRequest request) {
-            UserSettings savedSettings = routeCalculationService.saveUserSettings(userId, request);
-            UserSettingsDto responseDto = userSettingsMapper.mapUserSettingsToDto(savedSettings); //новый вариант, ПРОВЕРЬ!
-
-            return ResponseEntity.ok(responseDto);
+        UserSettings savedSettings = routeCalculationService.saveUserSettings(userId, request);
+        UserSettingsDto responseDto = userSettingsMapper.mapUserSettingsToDto(savedSettings);
+        return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping("/users/{userId}/calculate") //работает
+    @GetMapping("/users/{userId}/calculate")
     public ResponseEntity<RouteResponse> calculateRoute(@PathVariable Long userId) {
-            RouteResponse response = routeCalculationService.calculateOptimalRoute(userId);
-            return ResponseEntity.ok(response);
+        RouteResponse response = routeCalculationService.calculateOptimalRoute(userId, true); //добавили true
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/{userId}/settings") //работает
+    @GetMapping("/users/{userId}/settings")
     public ResponseEntity<UserSettingsDto> getUserSettings(@PathVariable Long userId) {
-        return routeCalculationService.getUserSettings(userId)      //НОВЫЙ КОД, ПРОВЕРЬ!
+        return routeCalculationService.getUserSettings(userId)
                 .map(userSettingsMapper::mapUserSettingsToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

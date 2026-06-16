@@ -2,6 +2,7 @@ package org.maxsid.work.bot.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.bot.kafka.service.KafkaProducerService;
+import org.maxsid.work.bot.service.CoreServiceClient;
 import org.maxsid.work.dto.RouteRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,7 @@ public class TransportBot extends TelegramLongPollingBot {
     private final Map<Long, UserState> userStates;
     private final Map<Long, RouteRequest> tempSettings;
     private final KafkaProducerService kafkaProducerService;
+    private final CoreServiceClient coreServiceClient;
 
     private enum UserState {
         IDLE,
@@ -34,13 +36,15 @@ public class TransportBot extends TelegramLongPollingBot {
     }
 
     public TransportBot(@Value("${bot.token}") String botToken,
-                        @Value("${bot.username}") String botUsername, KafkaProducerService kafkaProducerService) {
+                        @Value("${bot.username}") String botUsername, KafkaProducerService kafkaProducerService,
+                        CoreServiceClient coreServiceClient) {
         super(botToken);
         this.botToken = botToken;
         this.botUsername = botUsername;
         this.kafkaProducerService = kafkaProducerService;
         this.userStates = new HashMap<>();
         this.tempSettings = new HashMap<>();
+        this.coreServiceClient = coreServiceClient;
     }
 
     @Override
@@ -80,6 +84,16 @@ public class TransportBot extends TelegramLongPollingBot {
                 sendHelpMessage(chatId);
                 userStates.put(chatId, UserState.IDLE);
                 break;
+
+            case "/notifications_on":
+                enableNotifications(chatId, true);
+                userStates.put(chatId, UserState.IDLE);
+                break;
+
+            case "/notifications_off":
+                enableNotifications(chatId, false);
+                userStates.put(chatId, UserState.IDLE);
+                break;
             default:
                 handleStateMessage(chatId, text, currentState);
         }
@@ -108,9 +122,12 @@ public class TransportBot extends TelegramLongPollingBot {
                 Я помогу вам рассчитать оптимальное время выезда с учетом пробок.
 
                 Доступные команды:
+                /start - начать работу
                 /settings - Настройка домашнего и рабочего адреса
                 /calculate - Расчет времени выезда
                 /help - Помощь и инструкции
+                /notifications_on - включить уведомления
+                /notifications_off - выключить уведомления
                 """;
         sendMessage(chatId, welcomeText);
     }
@@ -118,13 +135,20 @@ public class TransportBot extends TelegramLongPollingBot {
     private void sendHelpMessage(Long chatId) {
         String helpText = """
                 📋 Инструкция по использованию бота:
-
+                
+                   Начать работу /start
+ 
                 1. Сначала настройте маршрут командой /settings
                 2. Введите домашний адрес
                 3. Введите рабочий адрес
                 4. Введите время прибытия на работу (например: 9:00)
 
                 5. Получите расчет времени выезда командой /calculate
+                
+                🔔 *Управление уведомлениями:
+                   
+                   Включить уведомления /notifications_on
+                   Выключить уведомления /notifications_off
 
                 ⚠️ Бот работает только в будние дни
                 ⏰ Учитывается 30-минутный буфер на сборы
@@ -182,26 +206,7 @@ public class TransportBot extends TelegramLongPollingBot {
             kafkaProducerService.sendUserSettingsToCore(chatId, settings);
 
             userStates.put(chatId, UserState.IDLE);
-//            tempSettings.remove(chatId);
 
-//            String confirmationText = String.format("""
-//                            ✅ Настройки успешно сохранены!
-//
-//                            🏠 Домашний адрес: %s
-//                            🏢 Рабочий адрес: %s
-//                            ⏰ Время прибытия: %s
-//                            🌍 Часовой пояс: %s
-//
-//                            Теперь используйте команду /calculate для расчета времени выезда.
-//                            """,
-//                    settings.getHomeAddress(),
-//                    settings.getWorkAddress(),
-//                    settings.getArrivalTime(),
-//                    settings.getTimeZone());
-//
-//            sendMessage(chatId, confirmationText);
-
-            // Вместо этого отправляем сообщение о том, что запрос отправлен
             sendMessage(chatId, "⏳ Настройки отправлены на обработку. Вы получите уведомление, когда они будут сохранены.");
 
         } catch (DateTimeParseException e) {
@@ -215,14 +220,6 @@ public class TransportBot extends TelegramLongPollingBot {
 
             //отправляем запрос через KAFKA
             kafkaProducerService.sendRouteCalculationRequestToCore(chatId, routeRequest);
-
-//            var response = coreServiceClient.calculateRoute(chatId);
-//
-//            if (response.getMessage() != null && !response.getMessage().isEmpty()) {
-//                sendMessage(chatId, response.getMessage());
-//            } else {
-//                sendMessage(chatId, "❌ Не удалось рассчитать маршрут. Проверьте настройки командой /settings");
-//            }
 
             tempSettings.remove(chatId);
 
@@ -278,6 +275,30 @@ public class TransportBot extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             System.err.println("Error sending message to chat " + chatId + ": " + e.getMessage());
+        }
+    }
+
+    public void enableNotifications(Long chatId, boolean enabled) {
+        try {
+            // Проверяем, есть ли настройки у пользователя
+            if (coreServiceClient.getUserSettings(chatId) == null) {
+                sendMessage(chatId, "❌ Сначала настройте маршрут через /settings");
+                return;
+            }
+
+            coreServiceClient.enableNotifications(chatId, enabled);
+
+            String status = enabled ? "включены ✅" : "выключены 🔕";
+            String emoji = enabled ? "✅" : "🔕";
+
+            sendMessage(chatId, emoji + " Уведомления " + status + "!\n\n" +
+                    (enabled ?
+                            "Вы будете получать уведомления за 30 минут до выезда." :
+                            "Вы не будете получать уведомления."));
+
+        } catch (Exception e) {
+            log.error("Failed to enable notifications for user {}: {}", chatId, e.getMessage());
+            sendMessage(chatId, "❌ Ошибка при изменении статуса уведомлений. Попробуйте позже.");
         }
     }
 }
