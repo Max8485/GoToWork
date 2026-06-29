@@ -1,5 +1,6 @@
 package org.maxsid.work.core.service.impl;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.entity.UserSchedule;
@@ -14,6 +15,7 @@ public class UserScheduleServiceImpl implements UserScheduleService {
 
     private final UserScheduleRepository userScheduleRepository;
 
+    @Timed(value = "enableNotifications.service", percentiles = {0.5, 0.95, 0.99})
     @Override
     public UserSchedule enableNotifications(Long userId, boolean enabled) {
         UserSchedule schedule = userScheduleRepository.findByUserId(userId).orElseGet(() -> UserSchedule.builder()

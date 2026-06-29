@@ -20,6 +20,7 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
+    @Override
     public void sendUserSettingsSavedEvent(Long userId, UserSettingsDto userSettingsDto) {
         try {
             String correlationId = UUID.randomUUID().toString();

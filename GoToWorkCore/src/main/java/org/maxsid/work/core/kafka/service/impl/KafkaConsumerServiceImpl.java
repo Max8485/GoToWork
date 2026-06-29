@@ -3,12 +3,10 @@ package org.maxsid.work.core.kafka.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.entity.UserSettings;
-import org.maxsid.work.core.kafka.service.KafkaProducerService;
+import org.maxsid.work.core.kafka.service.KafkaConsumerService;
 import org.maxsid.work.core.repository.UserSettingsRepository;
 import org.maxsid.work.core.service.RouteCalculationService;
 import org.maxsid.work.dto.RouteRequest;
-import org.maxsid.work.dto.RouteResponse;
-import org.maxsid.work.dto.kafka.RouteCalculationRequest;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -16,19 +14,19 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KafkaConsumerServiceImpl {
+public class KafkaConsumerServiceImpl implements KafkaConsumerService {
 
     private final RouteCalculationService routeCalculationService;
     private final UserSettingsRepository userSettingsRepository;
+
     /**
      * Получение настроек пользователя от TelegramBot
      */
+    @Override
     @KafkaListener(topics = "user-settings-from-bot-topic", groupId = "go-to-work-core-service")
     public void consumeUserSettingsFromBot(@Payload RouteRequest routeRequest,
                                            @Header(KafkaHeaders.RECEIVED_KEY) String chatId,
@@ -51,6 +49,7 @@ public class KafkaConsumerServiceImpl {
     /**
      * Получение запроса на расчет маршрута от TelegramBot
      */
+    @Override
     @KafkaListener(topics = "route-calculated-from-bot-topic", groupId = "go-to-work-core-service")
     public void consumeRouteCalculationRequestFromBot(@Payload RouteRequest routeRequest,
                                                       @Header(KafkaHeaders.RECEIVED_KEY) String chatId,

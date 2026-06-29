@@ -1,5 +1,6 @@
 package org.maxsid.work.core.service.impl;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
@@ -29,6 +30,7 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     private final UserSettingsRepository userSettingsRepository;
     private final KafkaProducerService kafkaProducerService;
 
+    @Timed(value = "calculateRoute.service", percentiles = {0.5, 0.95, 0.99}, histogram = true)
     @Override
     public RouteResponse calculateOptimalRoute(Long userId, boolean sendToKafka) { // добавили  boolean sendToKafka
         UserSettings userSettings = userSettingsRepository.findByUserId(userId)
@@ -64,15 +66,14 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
             // Отправка события в Kafka
             kafkaProducerService.sendRouteCalculatedEvent(userId, response);
         }
-//        // Отправка события в Kafka
-//        kafkaProducerService.sendRouteCalculatedEvent(userId, response);
 
         return response;
     }
 
+    @Timed(value = "saveUserSettings.service", percentiles = {0.5, 0.95, 0.99}, histogram = true)
     @Override
     public UserSettings saveUserSettings(Long userId, RouteRequest request) {
-        try { //try catch - Тоже новый код.
+        try {
             // Проверяем существующие настройки. Если есть - обновляем, если нет - создаем новые.
             UserSettings userSettings = userSettingsRepository.findByUserId(userId)
                     .map(currentSettings -> {
@@ -95,33 +96,6 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
                         );
                     });
 
-
-//        Optional<UserSettings> existingSettings = userSettingsRepository.findByUserId(userId).stream().findFirst();
-//
-//        UserSettings userSettings;
-//        if (existingSettings.isPresent()) {
-//            userSettings = existingSettings.get();
-//            log.info(">>> Updating existing settings for user {} (ID: {})",
-//                    userId, userSettings.getId());
-//            // Обновляем существующие настройки
-//
-//            userSettings.setHomeAddress(request.getHomeAddress()); //здесь мы перезаписываем текущие настройки маршрута, поэтому только один адрес всегда
-//            userSettings.setWorkAddress(request.getWorkAddress()); //надо проверить с разных аккаунтов
-//            userSettings.setTimeZone(request.getTimeZone());
-//            userSettings.setArrivalTimeToWork(request.getArrivalTime());
-//        } else {
-//            // Создаем НОВУЮ запись только если ее нет
-//            log.info(">>> Creating new settings for user {}", userId);
-//            // Создаем новые настройки
-//            userSettings = new UserSettings(
-//                    userId,
-//                    request.getHomeAddress(),
-//                    request.getWorkAddress(),
-//                    request.getTimeZone() != null ? request.getTimeZone() : "Europe/Moscow",
-//                    request.getArrivalTime()
-//            );
-//        }
-
             UserSettings savedSettings = userSettingsRepository.save(userSettings);
 
             // Отправка события в Kafka
@@ -142,6 +116,7 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
         }
     }
 
+    @Timed(value = "getUserSettings.service", percentiles = {0.5, 0.95, 0.99}, histogram = true)
     @Override
     public Optional<UserSettings> getUserSettings(Long userId) {
         return userSettingsRepository.findByUserId(userId);
