@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 @Configuration
 public class SchedulerConfig {
     @Bean
-    public LockProvider lockProvider(DataSource dataSource) {
+    public LockProvider lockProvider(DataSource dataSource) { //Почитать про lock provider! Можно ли без него обойтись?
         return new JdbcTemplateLockProvider(JdbcTemplateLockProvider.Configuration.builder()
                 .withJdbcTemplate(new JdbcTemplate(dataSource))
                 .withTableName("schedlock")  //  Имя таблицы

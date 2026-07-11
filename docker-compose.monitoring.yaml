@@ -9,6 +9,8 @@ services:
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
+    networks:
+      - app-network
 
 
   grafana:
@@ -20,6 +22,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana_data:/var/lib/grafana
+    networks:
+      - app-network
 
   postgres-exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:latest
@@ -28,8 +32,25 @@ services:
       - "9187:9187"
     environment:
       DATA_SOURCE_NAME: "postgresql://postgres:postgres@host.docker.internal:5432/go_to_work_db?sslmode=disable"
+    networks:
+      - app-network
     restart: unless-stopped
 
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: kafka-exporter
+    ports:
+      - "9308:9308"
+    command:
+      - '--kafka.server=kafka:9092'
+      - '--kafka.version=3.6.0'
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   prometheus_data:
