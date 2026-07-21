@@ -4,10 +4,12 @@ import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
+import org.maxsid.work.core.entity.UserSchedule;
 import org.maxsid.work.core.entity.UserSettings;
 import org.maxsid.work.core.exceptions.FailedToSaveUserSettingsException;
 import org.maxsid.work.core.exceptions.UserSettingsNotFoundException;
 import org.maxsid.work.core.kafka.service.KafkaProducerService;
+import org.maxsid.work.core.repository.UserScheduleRepository;
 import org.maxsid.work.core.repository.UserSettingsRepository;
 import org.maxsid.work.core.service.GeocodeService;
 import org.maxsid.work.core.service.RouteCalculationService;
@@ -18,6 +20,8 @@ import org.maxsid.work.dto.RouteResponse;
 import org.maxsid.work.dto.UserSettingsDto;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Slf4j
@@ -29,6 +33,7 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     private final RouteService routeService;
     private final UserSettingsRepository userSettingsRepository;
     private final KafkaProducerService kafkaProducerService;
+    private final UserScheduleRepository userScheduleRepository;
 
     @Timed(value = "calculateRoute.service", percentiles = {0.5, 0.95, 0.99}, histogram = true)
     @Override
@@ -50,8 +55,16 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
         Long travelMinutes = routeService.calculateTravelTimeToWork(homeCoords, workCoords);
 
         // Расчет времени выезда
-        String departureTime = TimeUtils.calculateDepartureTime(
+        LocalTime departureTime = TimeUtils.calculateDepartureTime( //заменили String на LocalTime
                 userSettings.getArrivalTimeToWork(), travelMinutes);
+
+        /////НОВЫЙ КОД////
+        // Вычисляем время уведомления (выезд - 30 мин)
+        LocalTime notificationTime = departureTime.minusMinutes(30);
+        saveNotificationTime(userId, notificationTime);
+        // Форматируем для ответа
+        String departureTimeStr = departureTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+        //////НОВЫЙ КОД////
 
         RouteResponse response = new RouteResponse(
                 userId,
@@ -59,7 +72,7 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
                 userSettings.getWorkAddress(),
                 userSettings.getArrivalTimeToWork(),
                 travelMinutes,
-                departureTime
+                departureTimeStr
         );
 
         if (sendToKafka) {  //новый код от дублей сообщений в боте от кафки
@@ -69,6 +82,26 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
 
         return response;
     }
+
+    private void saveNotificationTime(Long userId, LocalTime notificationTime) {
+        try {
+            UserSchedule schedule = userScheduleRepository.findByUserId(userId)
+                    .orElseGet(() -> UserSchedule.builder()
+                            .userId(userId)
+                            .enabled(true)
+                            .build());
+
+            schedule.setNotificationTime(notificationTime);
+            userScheduleRepository.save(schedule);
+
+            log.debug("Saved notification time {} for user {}", notificationTime, userId);
+
+        } catch (Exception e) {
+            log.error("Failed to save notification time for user {}: {}", userId, e.getMessage());
+        }
+    }
+
+
 
     @Timed(value = "saveUserSettings.service", percentiles = {0.5, 0.95, 0.99}, histogram = true)
     @Override
@@ -111,7 +144,7 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
 
             return savedSettings;
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new FailedToSaveUserSettingsException(userId, e);
         }
     }

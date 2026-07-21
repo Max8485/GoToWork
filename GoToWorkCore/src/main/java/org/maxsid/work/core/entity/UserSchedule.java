@@ -7,6 +7,8 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -26,4 +28,8 @@ public class UserSchedule {
 
     @Column(name = "last_notification_date")
     private LocalDate lastNotificationDate;
+
+
+    @Column(name = "notification_time")
+    private LocalTime notificationTime;
 }

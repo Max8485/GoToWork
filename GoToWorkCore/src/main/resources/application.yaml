@@ -11,6 +11,8 @@ spring:
   jpa:
     show-sql: true
     open-in-view: false
+    hibernate:
+      ddl-auto: validate
 
   application:
     name: go-to-work-core

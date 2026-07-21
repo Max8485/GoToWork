@@ -16,12 +16,14 @@ public class TimeUtils {
         return time.format(TIME_FORMATTER);
     }
 
-    public static String calculateDepartureTime(String arrivalTime, long travelMinutes) {
+    public static LocalTime calculateDepartureTime(String arrivalTime, long travelMinutes) {
         LocalTime arrival = parseTime(arrivalTime);
-        LocalTime departure = arrival
-                .minusMinutes(travelMinutes);
+        return arrival.minusMinutes(travelMinutes);
 
-        return formatTime(departure);
+//        LocalTime departure = arrival
+//                .minusMinutes(travelMinutes);
+
+//        return formatTime(departure);
     }
 
     public static boolean isWeekday() {
