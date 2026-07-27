@@ -23,7 +23,7 @@ public class RouteServiceImpl implements RouteService {
 
     private final GraphHopperFeignClient graphHopperFeignClient;
 
-    public Long calculateTravelTimeToWork(Coordinates from, Coordinates to) { //работает с feign client
+    public Long calculateTravelTimeToWork(Coordinates from, Coordinates to) {
         try {
             List<String> points = List.of(formatPoint(from), formatPoint(to));
 
@@ -58,50 +58,3 @@ public class RouteServiceImpl implements RouteService {
         return coords.getLat() + "," + coords.getLon();
     }
 }
-
-
-//Из того что не нравится - обилие магических констант и потенциальных NPE
-//все таки лучше завести дто, мб использовать какой-то другой http клиент вроде feign, должно складнее получится
-
-//    public Long calculateTravelTimeToWork(Coordinates from, Coordinates to) { //попробуй заменить на feign client
-//        String url = buildUrl(from, to);
-//
-//        try {
-//            ResponseEntity<GraphHopperResponse> response = restTemplate.getForEntity(url, GraphHopperResponse.class);
-//            GraphHopperResponse body = response.getBody();
-//
-//            if (body == null || body.getPaths() == null || body.getPaths().isEmpty()) {
-//                log.warn("No paths found in GraphHopper response for route from {} to {}", from, to);
-//                throw new RouteCalculationException("No paths found for route");
-//            }
-//
-//            GraphHopperResponse.Path path = body.getPaths().get(0);
-//            Long timeMs = path.getTime();
-//
-//            if (timeMs == null || timeMs <= 0) {
-//                log.warn("Invalid time value: {} for route from {} to {}", timeMs, from, to);
-//                throw new RouteCalculationException("Invalid time value in response");
-//            }
-//
-//            return timeMs / 1000 / 60;
-//
-//        } catch (Exception e) {
-//            log.error("Error calculating route from {} to {}: {}", from, to, e.getMessage(), e);
-//            throw new RouteCalculationException("Failed to calculate route", e);
-//        }
-//    }
-//
-//    private String buildUrl(Coordinates from, Coordinates to) {
-//        return UriComponentsBuilder.fromHttpUrl(graphUrl)
-//                .queryParam(POINT, formatPoint(from))
-//                .queryParam(POINT, formatPoint(to))
-//                .queryParam(VEHICLE, Vehicle.CAR.getValue())
-//                .queryParam(KEY, graphApiKey)
-//                .queryParam(CALC_POINTS, CALC_POINTS_DEFAULT)
-//                .toUriString();
-//    }
-//
-//    private String formatPoint(Coordinates coords) {
-//        return coords.getLat() + "," + coords.getLon();
-//    }
-//}

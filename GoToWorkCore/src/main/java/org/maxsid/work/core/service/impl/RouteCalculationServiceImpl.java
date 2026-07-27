@@ -55,16 +55,14 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
         Long travelMinutes = routeService.calculateTravelTimeToWork(homeCoords, workCoords);
 
         // Расчет времени выезда
-        LocalTime departureTime = TimeUtils.calculateDepartureTime( //заменили String на LocalTime
+        LocalTime departureTime = TimeUtils.calculateDepartureTime(
                 userSettings.getArrivalTimeToWork(), travelMinutes);
 
-        /////НОВЫЙ КОД////
         // Вычисляем время уведомления (выезд - 30 мин)
         LocalTime notificationTime = departureTime.minusMinutes(30);
         saveNotificationTime(userId, notificationTime);
         // Форматируем для ответа
         String departureTimeStr = departureTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-        //////НОВЫЙ КОД////
 
         RouteResponse response = new RouteResponse(
                 userId,

@@ -38,7 +38,7 @@ public class GeocodeServiceImpl implements GeocodeService {
     }
 
     @Override
-    public Coordinates geocodeAddress(String address) {  //работает с feign client
+    public Coordinates geocodeAddress(String address) {
         try {
             log.debug("Geocoding address: {}", address);
 
@@ -87,57 +87,4 @@ public class GeocodeServiceImpl implements GeocodeService {
     //    public String detectTimezone(Coordinates coordinate) { //исправить!
 //        return "Europe/Moscow";
 //    }
-
-
-
-
-//    @Override
-//    public Coordinates geocodeAddress(String address) {
-//        try {
-//            log.debug("Geocoding address: {}", address);
-//
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.set("Authorization", "Token " + dadataApiKey);
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//            Map<String, Object> requestBody = new HashMap<>();
-//            requestBody.put("query", address);
-//            requestBody.put("count", 1);
-//
-//            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-//
-//            ResponseEntity<DaDataResponse> response = restTemplate.exchange(
-//                    dadataUrl, HttpMethod.POST, entity, DaDataResponse.class);
-//
-//            if (response.getBody() != null && response.getBody().getSuggestions() != null &&
-//                    !response.getBody().getSuggestions().isEmpty()) {
-//
-//                var data = response.getBody().getSuggestions().get(0).getData();
-//                if (data != null && data.getGeo_lat() != null && data.getGeo_lon() != null) {
-//                    Double lat = parseCoordinate(data.getGeo_lat());
-//                    Double lon = parseCoordinate(data.getGeo_lon());
-//
-//                    Coordinates coord = new Coordinates(lat, lon);
-//                    log.debug("Geocoding successful: {} -> {}", address, coord);
-//
-//                    // ✅ Успешное геокодирование — метрика OK
-//                    metricsService.updateSyncStatus(true);
-//
-//                    return coord;
-//                }
-//            }
-//
-//            // ❌ Нет координат — метрика ERROR
-//            metricsService.updateSyncStatus(false);
-//            throw new RuntimeException("No coordinates found for address: " + address);
-//
-//        } catch (Exception e) {
-//            log.error("Geocoding failed for address: {}", address, e);
-//
-//            // ❌ Ошибка — метрика ERROR
-//            metricsService.updateSyncStatus(false);
-//            throw new RuntimeException("Geocoding failed for address: " + address, e);
-//        }
-//    }
-
 }

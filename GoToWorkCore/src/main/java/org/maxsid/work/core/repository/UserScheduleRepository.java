@@ -1,6 +1,7 @@
 package org.maxsid.work.core.repository;
 
 import org.maxsid.work.core.entity.UserSchedule;
+import org.maxsid.work.dto.UserNotificationData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,8 +15,16 @@ import java.util.Optional;
 public interface UserScheduleRepository extends JpaRepository<UserSchedule, Long> {
     Optional<UserSchedule> findByUserId(Long userId);
 
-    List<UserSchedule> findByEnabledTrue();
+    @Query("SELECT new org.maxsid.work.dto.UserNotificationData(" +
+            "us.userId, " +
+            "u.homeAddress, " +
+            "u.workAddress, " +
+            "u.arrivalTimeToWork, " +
+            "us.notificationTime, " +
+            "us.lastNotificationDate, " +
+            "us.enabled)" +
 
-    @Query("SELECT us FROM UserSchedule us WHERE us.enabled = true AND us.notificationTime = :time")
-    List<UserSchedule> findByEnabledTrueAndNotificationTime(@Param("time") LocalTime time);
+            " FROM UserSchedule us JOIN UserSettings u ON us.userId = u.userId" +
+            " WHERE us.enabled = true AND us.notificationTime = :time")
+    List<UserNotificationData> findUsersToNotify(@Param("time") LocalTime time);
 }

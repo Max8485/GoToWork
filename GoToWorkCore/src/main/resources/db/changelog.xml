@@ -6,4 +6,6 @@
     <include file="changesets/2026-06-11-add-schedlock-table.xml" relativeToChangelogFile="true"/>
     <include file="changesets/2026-06-11-add-user-schedule-table.xml" relativeToChangelogFile="true"/>
     <include file="changesets/2026-07-21-add-column-notification-time-for-user-schedule-table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/2026-07-25-partition-user-settings-table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/2026-07-27-recreate-partition-p10.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

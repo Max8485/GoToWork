@@ -13,6 +13,7 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+      generate_statistics: true
 
   application:
     name: go-to-work-core
@@ -64,6 +65,9 @@ management:
 logging:
   level:
     org.zalando.logbook: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.stat: DEBUG
 
 server:
   port: 8080
