@@ -1,0 +1,23 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="2026-06-11-schedlock-table" author="Maxim">
+        <createTable tableName="schedlock" remarks="Таблица блокировок для scheduler">
+            <column name="name" type="VARCHAR(64)" remarks="Название блокировки">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="lock_until" type="TIMESTAMP(3)" remarks="До какого момента блокировка активна">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locked_at" type="TIMESTAMP(3)" remarks="Когда была захвачена блокировка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locked_by" type="VARCHAR(255)" remarks="Какой экземпляр приложения захватил блокировку">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

@@ -1,8 +1,9 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/go_to_work_db
-    username: postgres
-    password: postgres
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
 
   liquibase:
     change-log: classpath:db/changelog.xml
@@ -10,14 +11,76 @@ spring:
   jpa:
     show-sql: true
     open-in-view: false
+    hibernate:
+      ddl-auto: validate
+      generate_statistics: true
+
+  application:
+    name: go-to-work-core
+
+  profiles:
+    active: ${SPRING_APPLICATION_PROFILE:prod}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093} #kafka:9092 - для docker
+    consumer:
+      group-id: go-to-work-core-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: RouteRequest:org.maxsid.work.dto.RouteRequest # после этого заработал user-settings-from-bot-topic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  task:
+    scheduling:
+      pool:
+        size: 5
+
+shedlock:
+  defaults:
+    lock-at-most-for: 2m
+    lock-at-least-for: 1m
+  jdbc:
+    table-name: schedlock
+    dialect: postgresql
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+logging:
+  level:
+    org.zalando.logbook: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.stat: DEBUG
 
 server:
   port: 8080
 
+telegram:
+  bot:
+#    url: ${TELEGRAM_BOT_URL:http://telegram-bot:8081}
+    url: ${TELEGRAM_BOT_URL:http://localhost:8081}
+
 app:
   dadata:
-    api-key: f0d7b7fbc70c8fd3baaa7a534539ef03c265e412
+    api-key: ${DADATA_API_KEY:f0d7b7fbc70c8fd3baaa7a534539ef03c265e412}
     url: https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address
   graphhooper:
-    api-key: 443b290d-37b9-495d-b3bd-688e8e28ff1e
+    api-key: ${GRAPHHOOPER_API_KEY:443b290d-37b9-495d-b3bd-688e8e28ff1e}
     url: https://graphhopper.com/api/1/route

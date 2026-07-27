@@ -1,55 +1,45 @@
 package org.maxsid.work.core.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.entity.UserSettings;
-import org.maxsid.work.core.dto.RouteRequest;
-import org.maxsid.work.core.dto.RouteResponse;
+import org.maxsid.work.core.mapper.UserSettingsMapper;
 import org.maxsid.work.core.service.RouteCalculationService;
-import org.maxsid.work.core.service.UserSettingsService;
-import org.maxsid.work.core.service.impl.RouteCalculationServiceImpl;
+import org.maxsid.work.dto.RouteRequest;
+import org.maxsid.work.dto.RouteResponse;
+import org.maxsid.work.dto.UserSettingsDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
+@Slf4j
 @RequestMapping("/api/routes")
 @RequiredArgsConstructor
 @RestController
 public class RouteController {
 
     private final RouteCalculationService routeCalculationService;
+    private final UserSettingsMapper userSettingsMapper;
 
-    @PostMapping("/users/{userId}/settings") //работает
-    public ResponseEntity<UserSettings> saveUserSettings(
+    @PostMapping("/users/{userId}/settings")
+    public ResponseEntity<UserSettingsDto> saveUserSettings(
             @PathVariable Long userId,
             @RequestBody RouteRequest request) {
-
-        try {
-            UserSettings savedSettings = routeCalculationService.saveUserSettings(userId, request);
-            return ResponseEntity.ok(savedSettings);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        UserSettings savedSettings = routeCalculationService.saveUserSettings(userId, request);
+        UserSettingsDto responseDto = userSettingsMapper.mapUserSettingsToDto(savedSettings);
+        return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping("/users/{userId}/calculate") //работает даже с Калиниградом
+    @GetMapping("/users/{userId}/calculate")
     public ResponseEntity<RouteResponse> calculateRoute(@PathVariable Long userId) {
-        try {
-            RouteResponse response = routeCalculationService.calculateOptimalRoute(userId);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(new RouteResponse());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        RouteResponse response = routeCalculationService.calculateOptimalRoute(userId, true); //добавили true
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/{userId}/settings") //работает
-    public ResponseEntity<UserSettings> getUserSettings(@PathVariable Long userId) {
-        var settings = routeCalculationService.getUserSettings(userId);
-        return settings.map(ResponseEntity::ok)
+    @GetMapping("/users/{userId}/settings")
+    public ResponseEntity<UserSettingsDto> getUserSettings(@PathVariable Long userId) {
+        return routeCalculationService.getUserSettings(userId)
+                .map(userSettingsMapper::mapUserSettingsToDto)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 }

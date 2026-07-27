@@ -1,14 +1,16 @@
 package org.maxsid.work.bot.service;
 
-import org.maxsid.work.core.dto.RouteRequest;
-import org.maxsid.work.core.dto.RouteResponse;
-import org.maxsid.work.core.entity.UserSettings;
+import org.maxsid.work.dto.*;
+
 
 public interface CoreServiceClient {
 
-    UserSettings saveUserSettings(Long userId, RouteRequest request);
+    UserSettingsDto saveUserSettings(Long userId, RouteRequest request);
 
     RouteResponse calculateRoute(Long userId);
 
-    UserSettings getUserSettings(Long userId);
+    UserSettingsDto getUserSettings(Long userId);
+
+    EnableNotificationsDto enableNotifications(Long userId, boolean enabled);
+
 }

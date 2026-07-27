@@ -1,0 +1,20 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="2026-06-11-user-schedule-table" author="Maxim">
+        <createTable tableName="user_schedules" remarks="Таблица с расписаниями уведомлений пользователей">
+            <column name="user_id" type="BIGINT" remarks="ID пользователя из Telegram">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true" remarks="Включены ли уведомления">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_notification_date" type="DATE" remarks="Дата последнего уведомления">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

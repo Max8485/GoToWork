@@ -1,4 +1,4 @@
-package org.maxsid.work.core.dto;
+package org.maxsid.work.dto;
 
 import lombok.*;
 
@@ -8,8 +8,9 @@ import lombok.*;
 @Setter
 @ToString
 @Builder
-public class RouteRequest {
-//    private Long id;
+public class UserSettingsDto {
+
+    private Long userId;
 
     private String homeAddress;
 
@@ -17,5 +18,5 @@ public class RouteRequest {
 
     private String timeZone;
 
-    private String arrivalTime;
+    private String arrivalTimeToWork;
 }

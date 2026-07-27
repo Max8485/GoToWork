@@ -1,25 +1,27 @@
 package org.maxsid.work.core.service.impl;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
+import org.maxsid.work.core.entity.UserSchedule;
 import org.maxsid.work.core.entity.UserSettings;
+import org.maxsid.work.core.exceptions.FailedToSaveUserSettingsException;
+import org.maxsid.work.core.exceptions.UserSettingsNotFoundException;
+import org.maxsid.work.core.kafka.service.KafkaProducerService;
+import org.maxsid.work.core.repository.UserScheduleRepository;
 import org.maxsid.work.core.repository.UserSettingsRepository;
-import org.maxsid.work.core.dto.RouteRequest;
-import org.maxsid.work.core.dto.RouteResponse;
 import org.maxsid.work.core.service.GeocodeService;
 import org.maxsid.work.core.service.RouteCalculationService;
 import org.maxsid.work.core.service.RouteService;
 import org.maxsid.work.core.utils.TimeUtils;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.maxsid.work.dto.RouteRequest;
+import org.maxsid.work.dto.RouteResponse;
+import org.maxsid.work.dto.UserSettingsDto;
 import org.springframework.stereotype.Service;
 
-import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -30,15 +32,14 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
     private final GeocodeService geocodeService;
     private final RouteService routeService;
     private final UserSettingsRepository userSettingsRepository;
+    private final KafkaProducerService kafkaProducerService;
+    private final UserScheduleRepository userScheduleRepository;
 
+    @Timed(value = "calculateRoute.service", percentiles = {0.5, 0.95, 0.99}, histogram = true)
     @Override
-    public RouteResponse calculateOptimalRoute(Long userId) {
-        Optional<UserSettings> userSettingsOpt = userSettingsRepository.findByUserId(userId);
-        if (userSettingsOpt.isEmpty()) {
-            throw new IllegalArgumentException("User settings not found for user id: " + userId);
-        }
-
-        UserSettings userSettings = userSettingsOpt.get();
+    public RouteResponse calculateOptimalRoute(Long userId, boolean sendToKafka) { // добавили  boolean sendToKafka
+        UserSettings userSettings = userSettingsRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserSettingsNotFoundException(userId));
 
 //        // Проверяем, будний ли день, работает!
 //        if (!TimeUtils.isWeekday()) {
@@ -54,46 +55,99 @@ public class RouteCalculationServiceImpl implements RouteCalculationService {
         Long travelMinutes = routeService.calculateTravelTimeToWork(homeCoords, workCoords);
 
         // Расчет времени выезда
-        String departureTime = TimeUtils.calculateDepartureTime(
+        LocalTime departureTime = TimeUtils.calculateDepartureTime(
                 userSettings.getArrivalTimeToWork(), travelMinutes);
 
-        return new RouteResponse(
+        // Вычисляем время уведомления (выезд - 30 мин)
+        LocalTime notificationTime = departureTime.minusMinutes(30);
+        saveNotificationTime(userId, notificationTime);
+        // Форматируем для ответа
+        String departureTimeStr = departureTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+
+        RouteResponse response = new RouteResponse(
                 userId,
                 userSettings.getHomeAddress(),
                 userSettings.getWorkAddress(),
                 userSettings.getArrivalTimeToWork(),
                 travelMinutes,
-                departureTime
+                departureTimeStr
         );
-    }
 
-    @Override
-    public UserSettings saveUserSettings(Long userId, RouteRequest request) {
-        // Проверяем существующие настройки
-        Optional<UserSettings> existingSettings = userSettingsRepository.findByUserId(userId);
-
-        UserSettings userSettings;
-        if (existingSettings.isPresent()) {
-            // Обновляем существующие настройки
-            userSettings = existingSettings.get();
-            userSettings.setHomeAddress(request.getHomeAddress());
-            userSettings.setWorkAddress(request.getWorkAddress());
-            userSettings.setTimeZone(request.getTimeZone());
-            userSettings.setArrivalTimeToWork(request.getArrivalTime());
-        } else {
-            // Создаем новые настройки
-            userSettings = new UserSettings(
-                    userId,
-                    request.getHomeAddress(),
-                    request.getWorkAddress(),
-                    request.getTimeZone() != null ? request.getTimeZone() : "Europe/Moscow",
-                    request.getArrivalTime()
-            );
+        if (sendToKafka) {  //новый код от дублей сообщений в боте от кафки
+            // Отправка события в Kafka
+            kafkaProducerService.sendRouteCalculatedEvent(userId, response);
         }
 
-        return userSettingsRepository.save(userSettings);
+        return response;
     }
 
+    private void saveNotificationTime(Long userId, LocalTime notificationTime) {
+        try {
+            UserSchedule schedule = userScheduleRepository.findByUserId(userId)
+                    .orElseGet(() -> UserSchedule.builder()
+                            .userId(userId)
+                            .enabled(true)
+                            .build());
+
+            schedule.setNotificationTime(notificationTime);
+            userScheduleRepository.save(schedule);
+
+            log.debug("Saved notification time {} for user {}", notificationTime, userId);
+
+        } catch (Exception e) {
+            log.error("Failed to save notification time for user {}: {}", userId, e.getMessage());
+        }
+    }
+
+
+
+    @Timed(value = "saveUserSettings.service", percentiles = {0.5, 0.95, 0.99}, histogram = true)
+    @Override
+    public UserSettings saveUserSettings(Long userId, RouteRequest request) {
+        try {
+            // Проверяем существующие настройки. Если есть - обновляем, если нет - создаем новые.
+            UserSettings userSettings = userSettingsRepository.findByUserId(userId)
+                    .map(currentSettings -> {
+                        //обновляем настройки
+                        currentSettings.setHomeAddress(request.getHomeAddress()); //здесь мы перезаписываем текущие настройки маршрута, поэтому только один адрес всегда
+                        currentSettings.setWorkAddress(request.getWorkAddress()); //надо проверить с разных аккаунтов
+                        currentSettings.setTimeZone(request.getTimeZone());
+                        currentSettings.setArrivalTimeToWork(request.getArrivalTime());
+
+                        return currentSettings;
+                    })
+                    .orElseGet(() -> { //orElseGet() - выполняется, если значения нет
+                        // если настроек НЕТ, создаем НОВУЮ запись
+                        return new UserSettings(
+                                userId,
+                                request.getHomeAddress(),
+                                request.getWorkAddress(),
+                                request.getTimeZone() != null ? request.getTimeZone() : "Europe/Moscow",
+                                request.getArrivalTime()
+                        );
+                    });
+
+            UserSettings savedSettings = userSettingsRepository.save(userSettings);
+
+            // Отправка события в Kafka
+            UserSettingsDto dto = UserSettingsDto.builder()
+                    .userId(savedSettings.getUserId())
+                    .homeAddress(savedSettings.getHomeAddress())
+                    .workAddress(savedSettings.getWorkAddress())
+                    .timeZone(savedSettings.getTimeZone())
+                    .arrivalTimeToWork(savedSettings.getArrivalTimeToWork())
+                    .build();
+
+            kafkaProducerService.sendUserSettingsSavedEvent(userId, dto);
+
+            return savedSettings;
+
+        } catch (Exception e) {
+            throw new FailedToSaveUserSettingsException(userId, e);
+        }
+    }
+
+    @Timed(value = "getUserSettings.service", percentiles = {0.5, 0.95, 0.99}, histogram = true)
     @Override
     public Optional<UserSettings> getUserSettings(Long userId) {
         return userSettingsRepository.findByUserId(userId);

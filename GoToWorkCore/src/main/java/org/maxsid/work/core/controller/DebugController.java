@@ -1,5 +1,6 @@
 package org.maxsid.work.core.controller;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.maxsid.work.core.coordinates.Coordinates;
@@ -20,6 +21,13 @@ public class DebugController {
 
     private final GeocodeService geocodingService;
     private final RouteService routingService;
+    private final MeterRegistry meterRegistry;
+
+    @GetMapping("/test-metric")
+    public String testMetric() {
+        meterRegistry.gauge("test.metric", 42);
+        return "OK";
+    }
 
     @GetMapping("/geocode")
     public String testGeocode(@RequestParam String address) { //геокод работает!

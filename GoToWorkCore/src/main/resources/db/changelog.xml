@@ -3,7 +3,9 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
     <include file="changesets/2025-10-11-add-user-settings-table.xml" relativeToChangelogFile="true"/>
-<!--    <include file="changesets/2025-06-07-comment-table.xml" relativeToChangelogFile="true"/>-->
-<!--    <include file="changesets/2025-06-07-add-employee-account-table.xml" relativeToChangelogFile="true"/>-->
-<!--    <include file="changesets/2025-06-07-add-role-table.xml" relativeToChangelogFile="true"/>-->
+    <include file="changesets/2026-06-11-add-schedlock-table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/2026-06-11-add-user-schedule-table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/2026-07-21-add-column-notification-time-for-user-schedule-table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/2026-07-25-partition-user-settings-table.xml" relativeToChangelogFile="true"/>
+    <include file="changesets/2026-07-27-recreate-partition-p10.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

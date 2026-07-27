@@ -1,0 +1,47 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="2026-07-25-partition-user-settings-table" author="Maxim">
+        <!-- Создаём партиционированную таблицу через SQL -->
+        <sql splitStatements="false">
+            CREATE TABLE user_settings_partitioned (
+                                                       id BIGSERIAL,
+                                                       user_id BIGINT NOT NULL,
+                                                       home_address TEXT NOT NULL,
+                                                       work_address TEXT NOT NULL,
+                                                       time_zone TEXT NOT NULL,
+                                                       arrival_time_to_work TEXT NOT NULL
+            ) PARTITION BY RANGE (user_id);
+
+        <!-- Создаём партиции -->
+            DO $$
+            DECLARE
+            i INT := 0;
+                start_val INT;
+                end_val INT;
+            BEGIN
+            FOR i IN 0..10 LOOP
+                    start_val := i * 200000;
+                    end_val := (i + 1) * 200000;
+            EXECUTE format('
+                        CREATE TABLE user_settings_p%s PARTITION OF user_settings_partitioned
+                        FOR VALUES FROM (%s) TO (%s)',
+                           i, start_val, end_val
+                );
+            END LOOP;
+            END $$;
+
+        <!-- Переносим данные -->
+            INSERT INTO user_settings_partitioned (id, user_id, home_address, work_address, time_zone, arrival_time_to_work)
+            SELECT id, user_id, home_address, work_address, time_zone, arrival_time_to_work
+            FROM user_settings;
+
+        <!-- Переименовываем таблицы -->
+            ALTER TABLE user_settings RENAME TO user_settings_old;
+            ALTER TABLE user_settings_partitioned RENAME TO user_settings;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
